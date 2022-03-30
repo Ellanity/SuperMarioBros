@@ -1,0 +1,53 @@
+{
+    "name": "1",
+    "time": "Infinity",
+    "locations": [{"entry": "Plain"}],
+    "areas": [{
+        "setting": "Overworld",
+        "creation": [
+            {
+                "macro": "Floor",
+                "x": 0,
+                "y": 0,
+                "quantity_horizontal": 30,
+                "quantity_vertical": 1
+            },{
+                "macro": "Floor",
+                "x": 300,
+                "y": 150,
+                "quantity_horizontal": 8,
+                "quantity_vertical": 1
+            },{
+                "macro": "Floor",
+                "x": 500,
+                "y": 248,
+                "quantity_horizontal": 2,
+                "quantity_vertical": 5
+            },{
+                "type": "Floor",
+                "x": 190,
+                "y": 150
+            },{
+                "type": "Floor",
+                "x": 0,
+                "y": 150
+            },{
+                "type": "Floor",
+                "x": 300,
+                "y": 48
+            },{
+                "type": "Floor",
+                "x": 500,
+                "y": 48
+            },{
+                "type": "Floor",
+                "x": 800,
+                "y": 48
+            },{
+                "type": "Floor",
+                "x": 348,
+                "y": 198
+            }
+        ]
+    }]
+}
