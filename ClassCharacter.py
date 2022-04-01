@@ -1,6 +1,6 @@
 import pygame
 from ClassEntity import Entity
-
+# 10128 - конец уровн
 
 class Character(Entity):
     def __init__(self, level, image_name=None, type_name=None):
@@ -12,7 +12,7 @@ class Character(Entity):
         self.jumped_up = False
         self.turned_right = True
 
-    def movement_right(self):
+    def movement_right(self, cant_go_beyond_screen=False):
         # sprite
         if not self.turned_right:
             self.turned_right = True
@@ -46,7 +46,10 @@ class Character(Entity):
             self.position_x += self.speed  # + speed
         else:
             self.position_x = obstacle["sprite"].position_x - self.image.get_width()"""
-        #
+        # additional condition
+        if cant_go_beyond_screen:
+            if self.position_x + self.image.get_width() > self.level.window.get_width() + self.level.coordinate_level_left_border:
+                self.position_x = self.level.coordinate_level_left_border + self.level.window.get_width() - self.image.get_width()
         self.update_sprite()
 
     def movement_left(self, cant_go_beyond_screen=False):
@@ -85,10 +88,22 @@ class Character(Entity):
         for intersection in intersections:
             if intersection["type_y"] == "top":
                 roof = True
-            if intersection["type_x"] == "left":
+            # for the first time in my life I'm doing a bug on purpose
+            if intersection["type_y"] == "top" and \
+                    self.position_x + self.image.get_width() < intersection["sprite"].position_x + 8:
+                self.position_x -= (self.position_x + self.image.get_width() - intersection["sprite"].position_x)
+                self.update_sprite()
+                roof = False
+            if intersection["type_y"] == "top" and \
+                    self.position_x > intersection["sprite"].position_x + intersection["sprite"].image.get_width() - 8:
+                self.position_x += (intersection["sprite"].position_x + intersection["sprite"].image.get_width() - self.position_x)
+                self.update_sprite()
+                roof = False
+            # now its ok
+            """if intersection["type_x"] == "left":
                 self.position_x = intersection["sprite"].position_x + intersection["sprite"].image.get_width()
             if intersection["type_x"] == "right":
-                self.position_x = intersection["sprite"].position_x - self.image.get_width()
+                self.position_x = intersection["sprite"].position_x - self.image.get_width()"""
 
         if not self.jumped_up:
             if self.start_jump_height == 0:
@@ -149,12 +164,16 @@ class Character(Entity):
                 type_of_intersection_x = str()
                 # vertical intersections
                 if self.position_y >= sprite.position_y >= self.position_y - self.image.get_height() and \
-                        abs(sprite.position_x - self.position_x) < self.image.get_width():
+                        self.position_x + self.image.get_width() >= sprite.position_x and \
+                        self.position_x <= sprite.position_x + sprite.image.get_width():
+                        # abs(sprite.position_x - self.position_x) < self.image.get_width():
                     type_of_intersection_y = "top"
                 # if sprite.position_y - sprite.image.get_height() + 10 >= self.position_y >= sprite.position_y -
                 # sprite.image.get_height() - 2 and \
                 if sprite.position_y >= self.position_y >= sprite.position_y - sprite.image.get_height() - 2 and \
-                        abs(sprite.position_x - self.position_x) < self.image.get_width():
+                        self.position_x + self.image.get_width() >= sprite.position_x and \
+                        self.position_x <= sprite.position_x + sprite.image.get_width():
+                        # abs(sprite.position_x - self.position_x) < self.image.get_width():
                     type_of_intersection_y = "bottom"
                 # horizontal
                 if sprite.position_y >= self.position_y >= sprite.position_y - sprite.image.get_height() and \

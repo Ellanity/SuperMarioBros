@@ -1,6 +1,7 @@
 {
     "name": "1",
     "time": "Infinity",
+    "length": 10128,
     "locations": [{"entry": "Plain"}],
     "areas": [{
         "setting": "Overworld",
@@ -9,44 +10,404 @@
                 "macro": "Floor",
                 "x": 0,
                 "y": 0,
-                "quantity_horizontal": 30,
-                "quantity_vertical": 1
+                "quantity_horizontal": 69,
+                "quantity_vertical": 2
             },{
                 "macro": "Floor",
-                "x": 300,
-                "y": 150,
+                "x": 3408,
+                "y": 0,
+                "quantity_horizontal": 15,
+                "quantity_vertical": 2
+            },{
+                "macro": "Floor",
+                "x": 4272,
+                "y": 0,
+                "quantity_horizontal": 64,
+                "quantity_vertical": 2
+            },{
+                "macro": "Floor",
+                "x": 7440,
+                "y": 0,
+                "quantity_horizontal": 56,
+                "quantity_vertical": 2
+            },
+
+            {
+                "type": "PipeVertical",
+                "x": 1344,
+                "y": 96
+            },{
+                "type": "PipeCapVertical",
+                "x": 1338,
+                "y": 144
+            },{
+                "macro": "PipeVertical",
+                "x": 1830,
+                "y": 96,
+                "quantity_horizontal": 1,
+                "quantity_vertical": 2
+            },{
+                "type": "PipeCapVertical",
+                "x": 1824,
+                "y": 192
+            },{
+                "macro": "PipeVertical",
+                "x": 2214,
+                "y": 96,
+                "quantity_horizontal": 1,
+                "quantity_vertical": 3
+            },{
+                "type": "PipeCapVertical",
+                "x": 2208,
+                "y": 240
+            },{
+                "macro": "PipeVertical",
+                "x": 2742,
+                "y": 96,
+                "quantity_horizontal": 1,
+                "quantity_vertical": 3
+            },{
+                "type": "PipeCapVertical",
+                "x": 2736,
+                "y": 240
+            },
+            {
+                "type": "PipeVertical",
+                "x": 7830,
+                "y": 96
+            },{
+                "type": "PipeCapVertical",
+                "x": 7824,
+                "y": 144
+            },
+            {
+                "type": "PipeVertical",
+                "x": 8598,
+                "y": 96
+            },{
+                "type": "PipeCapVertical",
+                "x": 8592,
+                "y": 144
+            },
+
+            {
+                "macro": "Stone",
+                "x": 6432,
+                "y": 96,
+                "quantity_horizontal": 4,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 6480,
+                "y": 144,
+                "quantity_horizontal": 3,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 6528,
+                "y": 192,
+                "quantity_horizontal": 2,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 6576,
+                "y": 240,
+                "quantity_horizontal": 1,
+                "quantity_vertical": 1
+            },
+            {
+                "macro": "Stone",
+                "x": 6720,
+                "y": 96,
+                "quantity_horizontal": 4,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 6720,
+                "y": 144,
+                "quantity_horizontal": 3,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 6720,
+                "y": 192,
+                "quantity_horizontal": 2,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 6720,
+                "y": 240,
+                "quantity_horizontal": 1,
+                "quantity_vertical": 1
+            },
+            {
+                "macro": "Stone",
+                "x": 7104,
+                "y": 96,
+                "quantity_horizontal": 5,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 7152,
+                "y": 144,
+                "quantity_horizontal": 4,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 7200,
+                "y": 192,
+                "quantity_horizontal": 3,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 7248,
+                "y": 240,
+                "quantity_horizontal": 2,
+                "quantity_vertical": 1
+            },
+            {
+                "macro": "Stone",
+                "x": 7440,
+                "y": 96,
+                "quantity_horizontal": 4,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 7440,
+                "y": 144,
+                "quantity_horizontal": 3,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 7440,
+                "y": 192,
+                "quantity_horizontal": 2,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 7440,
+                "y": 240,
+                "quantity_horizontal": 1,
+                "quantity_vertical": 1
+            },
+            {
+                "macro": "Stone",
+                "x": 8688,
+                "y": 96,
+                "quantity_horizontal": 9,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 8736,
+                "y": 144,
                 "quantity_horizontal": 8,
                 "quantity_vertical": 1
             },{
-                "macro": "Floor",
-                "x": 500,
-                "y": 248,
+                "macro": "Stone",
+                "x": 8784,
+                "y": 192,
+                "quantity_horizontal": 7,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 8832,
+                "y": 240,
+                "quantity_horizontal": 6,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 8880,
+                "y": 288,
+                "quantity_horizontal": 5,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 8928,
+                "y": 336,
+                "quantity_horizontal": 4,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 8976,
+                "y": 384,
+                "quantity_horizontal": 3,
+                "quantity_vertical": 1
+            },{
+                "macro": "Stone",
+                "x": 9024,
+                "y": 432,
                 "quantity_horizontal": 2,
-                "quantity_vertical": 5
+                "quantity_vertical": 1
             },{
-                "type": "Floor",
-                "x": 190,
-                "y": 150
-            },{
-                "type": "Floor",
+                "macro": "Stone",
+                "x": 9504,
+                "y": 96,
+                "quantity_horizontal": 1,
+                "quantity_vertical": 1
+            },
+
+            {
+                "type": "HillLarge",
                 "x": 0,
-                "y": 150
+                "y": 96
             },{
-                "type": "Floor",
-                "x": 300,
-                "y": 48
+                "type": "HillSmall",
+                "x": 768,
+                "y": 96
             },{
-                "type": "Floor",
-                "x": 500,
-                "y": 48
+                "type": "Bush3",
+                "x": 552,
+                "y": 96
             },{
-                "type": "Floor",
-                "x": 800,
-                "y": 48
+                "type": "Bush1",
+                "x": 1128,
+                "y": 96
             },{
-                "type": "Floor",
-                "x": 348,
-                "y": 198
+                "type": "Bush2",
+                "x": 1992,
+                "y": 96
+            },{
+                "type": "HillLarge",
+                "x": 2304,
+                "y": 96
+            },{
+                "type": "Bush3",
+                "x": 2856,
+                "y": 96
+            },{
+                "type": "HillSmall",
+                "x": 3072,
+                "y": 96
+            },{
+                "type": "Bush1",
+                "x": 3432,
+                "y": 96
+            },{
+                "type": "Bush2",
+                "x": 4296,
+                "y": 96
+            },{
+                "type": "HillLarge",
+                "x": 4608,
+                "y": 96
+            },{
+                "type": "Bush3",
+                "x": 5160,
+                "y": 96
+            },{
+                "type": "HillSmall",
+                "x": 5376,
+                "y": 96
+            },{
+                "type": "Bush1",
+                "x": 5736,
+                "y": 96
+            },{
+                "type": "Bush2",
+                "x": 6600,
+                "y": 96
+            },{
+                "type": "HillLarge",
+                "x": 6912,
+                "y": 96
+            },{
+                "type": "Bush3",
+                "x": 7464,
+                "y": 96
+            },{
+                "type": "HillSmall",
+                "x": 7680,
+                "y": 96
+            },{
+                "type": "Bush1",
+                "x": 8040,
+                "y": 96
+            },{
+                "type": "Bush2",
+                "x": 8904,
+                "y": 96
+            },{
+                "type": "HillLarge",
+                "x": 9216,
+                "y": 96
+            },{
+                "type": "Bush3",
+                "x": 9768,
+                "y": 96
+            },{
+                "type": "HillSmall",
+                "x": 9984,
+                "y": 96
+            },
+
+            {
+                "type": "Cloud1",
+                "x": 408,
+                "y": 504
+            },{
+                "type": "Cloud1",
+                "x": 936,
+                "y": 552
+            },{
+                "type": "Cloud3",
+                "x": 1320,
+                "y": 504
+            },{
+                "type": "Cloud2",
+                "x": 1752,
+                "y": 552
+            },{
+                "type": "Cloud1",
+                "x": 2712,
+                "y": 504
+            },{
+                "type": "Cloud1",
+                "x": 3240,
+                "y": 552
+            },{
+                "type": "Cloud3",
+                "x": 3624,
+                "y": 504
+            },{
+                "type": "Cloud2",
+                "x": 4056,
+                "y": 552
+            },{
+                "type": "Cloud1",
+                "x": 5016,
+                "y": 504
+            },{
+                "type": "Cloud1",
+                "x": 5544,
+                "y": 552
+            },{
+                "type": "Cloud3",
+                "x": 5928,
+                "y": 504
+            },{
+                "type": "Cloud2",
+                "x": 6360,
+                "y": 552
+            },{
+                "type": "Cloud1",
+                "x": 7320,
+                "y": 504
+            },{
+                "type": "Cloud1",
+                "x": 7848,
+                "y": 552
+            },{
+                "type": "Cloud3",
+                "x": 8232,
+                "y": 504
+            },{
+                "type": "Cloud2",
+                "x": 8664,
+                "y": 552
+            },{
+                "type": "Cloud1",
+                "x": 9624,
+                "y": 504
             }
         ]
     }]

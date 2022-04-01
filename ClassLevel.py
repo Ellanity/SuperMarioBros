@@ -21,6 +21,7 @@ class Level:
         # the second system is the coordinates inside the level
         self.coordinate_level_left_border = 0  # used to move the screen + a reference point for rendering
         self.coordinate_level_max_right_point = self.window.get_width()
+        self.length = 0
 
         # All in-game entities
         self.sceneries = list()
@@ -31,8 +32,10 @@ class Level:
 
         # Different entities have different names.
         # Lists are required to separate entities into groups by name
-        self.sceneries_type_names = list()
-        self.solids_type_names = ["Floor", "Stone", "Pipe", "PipeHorizontal", "PipeVertical", "Brick", "Block"]
+        self.sceneries_type_names = ["BrickPlain", "Bush1", "Bush2", "Bush3",
+                                     "Cloud1", "Cloud2", "Cloud3", "HillSmall", "HillLarge"]
+        self.solids_type_names = ["Floor", "Stone", "Brick", "PipeHorizontal",
+                                  "PipeVertical", "PipeCapHorizontal", "PipeCapVertical", "PipeCrossroad"]
         self.items_type_names = list()
         self.characters_type_names = list()
 
@@ -82,9 +85,11 @@ class Level:
         self.physics()
 
     def move_screen(self):
-        line_of_screen_movement = int(self.window.get_width() / 10 * 6)  # 60% of screen size
-        if self.player.position_x - self.coordinate_level_left_border > line_of_screen_movement:
-            self.coordinate_level_left_border += self.player.speed
+        # self.player.image.get_width() +
+        if self.player.position_x + self.player.image.get_width() + int(self.window.get_width() / 10 * 4) < self.length:
+            line_of_screen_movement = int(self.window.get_width() / 10 * 6)  # 60% of screen size
+            if self.player.position_x - self.coordinate_level_left_border > line_of_screen_movement:
+                self.coordinate_level_left_border += self.player.speed
 
     def load_level_from_file(self, file_name):
         # reading json from file
@@ -96,6 +101,7 @@ class Level:
 
         # Convert data to level objects
         if self.data is not None:
+            self.length = self.data["length"]
             # Can consist of several zones(areas)
             for area in self.data["areas"]:
                 # Depending on the zone, the colors of the images change, so we define the suffix

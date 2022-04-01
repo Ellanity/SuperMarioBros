@@ -4,7 +4,7 @@ from pygame.locals import *
 from ClassLevel import Level
 
 pygame.init()
-screen = pygame.display.set_mode((1000, 600))
+screen = pygame.display.set_mode((1000, 700))
 pygame.display.set_caption("Super Mario Bros")
 clock = pygame.time.Clock()
 
@@ -24,7 +24,7 @@ def main():
 
         # keys
         if pygame.key.get_pressed()[K_RIGHT]:
-            lvl.player.movement_right()
+            lvl.player.movement_right(cant_go_beyond_screen=True)
             lvl.move_screen()
         if pygame.key.get_pressed()[K_LEFT]:
             lvl.player.movement_left(cant_go_beyond_screen=True)
