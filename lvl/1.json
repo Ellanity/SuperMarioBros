@@ -7,17 +7,42 @@
         "setting": "Overworld",
         "creation": [
             {
-                "macro": "PipeVertical",
-                "x": 300,
-                "y": 96,
-                "quantity_horizontal": 1,
-                "quantity_vertical": 2
+                "type": "Block",
+                "x": 768,
+                "y": 240,
+                "content": "coin",
+                "quantity_of_content": 0
             },{
-                "type": "PipeCapVertical",
-                "x": 294,
-                "y": 192
+                "type": "Brick",
+                "x": 960,
+                "y": 240
+            },{
+                "type": "Block",
+                "x": 1008,
+                "y": 240,
+                "content": "coin",
+                "quantity_of_content": 0
+            },{
+                "type": "Brick",
+                "x": 1056,
+                "y": 240
+            },{
+                "type": "Block",
+                "x": 1104,
+                "y": 240,
+                "content": "coin",
+                "quantity_of_content": 0
+            },{
+                "type": "Brick",
+                "x": 1152,
+                "y": 240
+            },{
+                "type": "Block",
+                "x": 1056,
+                "y": 432,
+                "content": "coin",
+                "quantity_of_content": 0
             },
-
 
             {
                 "macro": "Floor",

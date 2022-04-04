@@ -14,7 +14,6 @@ class Character(Entity):
         self.jumped_up = False
         # sprite
         self.turned_right = True
-        self.set_of_images = []
         self.current_image = 0
         self.state = {"move": False, "up": False, "death": False}
 
@@ -31,7 +30,7 @@ class Character(Entity):
             if intersection["type_x"] == "right":
                 obstacle = intersection
         if obstacle is None:
-            self.position_x += self.speed  # + speed
+            self.position_x += self.speed  # go right (+)
             self.update_sprite()
             # check new obstacle after movement
             new_obstacle = None
@@ -60,7 +59,6 @@ class Character(Entity):
         self.state["move"] = True
         if self.turned_right:
             self.turned_right = False
-            # self.image = pygame.transform.flip(self.image, True, False)
         # movement
         obstacle = None
         intersections = self.get_intersections(self.level.solids)
@@ -68,7 +66,7 @@ class Character(Entity):
             if intersection["type_x"] == "left":
                 obstacle = intersection
         if obstacle is None:
-            self.position_x -= self.speed  # - speed
+            self.position_x -= self.speed  # go left (-)
             self.update_sprite()
             # check new after movement obstacle
             new_obstacle = None
@@ -88,43 +86,8 @@ class Character(Entity):
         self.update_sprite()
 
     def movement_up(self):
-
-        """# check bottom | can it jump at all?
-        # self.state["up"] = True
-        intersections = self.get_intersections(self.level.solids)
-        for intersection in intersections:
-            if intersection["type_y"] == "bottom":
-                self.jumped_up = False
-            if intersection["type_y"] == "top":
-                self.jumped_up = True
-                if self.position_x + self.image.get_width() < intersection["sprite"].position_x + 8:
-                    self.position_x -= (self.position_x + self.image.get_width() - intersection["sprite"].position_x)
-                    self.jumped_up = False
-                if self.position_x > intersection["sprite"].position_x + intersection["sprite"].image.get_width() - 8:
-                    self.position_x += (intersection["sprite"].position_x + intersection["sprite"].image.get_width() - self.position_x)
-                    self.jumped_up = False
-
-        if not self.jumped_up:
-            if self.start_jump_height == 0:
-                self.start_jump_height = self.position_y
-            elif self.start_jump_height - self.position_y <= self.max_jump_height:
-                self.position_y -= self.jump_speed
-            else:
-                self.jumped_up = True
-        else:
-            self.start_jump_height = 0
-        # after update check obstacles
-        self.position_y += 1
-        self.update_sprite()
-        intersections = self.get_intersections(self.level.solids)
-        for intersection in intersections:
-            if intersection["type_y"] == "bottom":
-                self.position_y = intersection["sprite"].position_y - self.image.get_height()
-                self.jumped_up = False
-        self.update_sprite()
-        """
-        # self.jumped_up = False
-
+        # I think the roof variable can be removed and the code rewritten
+        # so that only the self.jumped_up variable is used
         roof = False
         intersections = self.get_intersections(self.level.solids)
         for intersection in intersections:
@@ -135,16 +98,36 @@ class Character(Entity):
             # There's another bug that I didn't want to do
             # if there are two blocks above the hero, he will jump, the first one will say that he crashed,
             # and there is no roof anymore, and the character will pass through the second block
-            if intersection["type_y"] == "top":
-                if self.position_x + self.image.get_width() < intersection["sprite"].position_x + 8:
-                    self.position_x -= (self.position_x + self.image.get_width() - intersection["sprite"].position_x)
-                    # self.update_sprite()
-                    roof = False
-                if self.position_x > intersection["sprite"].position_x + intersection["sprite"].image.get_width() - 8:
-                    self.position_x += (intersection["sprite"].position_x + intersection["sprite"].image.get_width() - self.position_x)
-                    # self.update_sprite()
-                    roof = False
-            # now its ok
+            if self.type_name == "Player":
+                if intersection["type_y"] == "top":
+                    position_x_before = self.position_x
+                    if self.position_x + self.image.get_width() < intersection["sprite"].position_x + (
+                            self.image.get_width() / 2 - 5):
+                        self.position_x -= (self.position_x + self.image.get_width() -
+                                            intersection["sprite"].position_x)
+                        # self.update_sprite()
+                        roof = False
+                    if self.position_x > intersection["sprite"].position_x + intersection["sprite"].image.get_width() -\
+                            (self.image.get_width() / 2 - 5):
+                        self.position_x += (intersection["sprite"].position_x + intersection[
+                            "sprite"].image.get_width() - self.position_x)
+                        # self.update_sprite()
+                        roof = False
+                    # this should fix the error described above \/
+                    self.update_sprite()
+                    new_intersections = self.get_intersections(self.level.solids)
+                    for new_intersection in new_intersections:
+                        if new_intersection["type_y"] == "top":
+                            self.position_x = position_x_before
+                            self.update_sprite()
+                            roof = True
+                            break
+                    # need check first top intersection to destroy or animate block
+                    if intersection["sprite"].type_name == "Brick":
+                        print(intersection["sprite"].position_x)
+                        # intersection["sprite"].animate(animation_speed=1)
+
+            # when the character has a fulcrum after jumping, he can jump again
             if intersection["type_y"] == "bottom":
                 self.position_y = intersection["sprite"].position_y - self.image.get_height()
                 self.jumped_up = False
@@ -166,9 +149,8 @@ class Character(Entity):
         else:
             self.start_jump_height = 0
         self.update_sprite()
-        # self.jumped_up = False
 
-        self.position_y += 1
+        self.position_y += 1  # this is so that there is an intersection and it is possible to determine the fulcrum
         self.update_sprite()
         intersections = self.get_intersections(self.level.solids)
         for intersection in intersections:
@@ -200,7 +182,7 @@ class Character(Entity):
                 if intersection["type_y"] == "bottom":
                     self.position_y = intersection["sprite"].position_y - self.image.get_height()
                     self.state["up"] = False
-                    # self.position_y = intersection["sprite"].position_y - intersection["sprite"].image.get_height() - 1
+                    # self.position_y = intersection["sprite"].position_y - intersection["sprite"].image.get_height()- 1
                     self.update_sprite()
                     break
         self.update_sprite()
@@ -211,11 +193,13 @@ class Character(Entity):
     def get_intersections(self, sprites_group):
         intersections = list()
         for sprite in sprites_group:
-            # if pygame.sprite.collide_mask(self, sprite):
+            # pygame.sprite.collide_mask(self, sprite)
+            # here it was possible to make intersections by masks,
+            # but then something bad happens during the animation
             if pygame.sprite.collide_rect(self, sprite):
                 ##########################################################################
                 ###########          !!!    Congratulations     !!!          #############
-                ###########          !!!    It does not work    !!!          #############
+                ###########          !!!       It works         !!!          #############
                 ##########################################################################
                 type_of_intersection_y = str()
                 type_of_intersection_x = str()
@@ -224,10 +208,6 @@ class Character(Entity):
                         self.position_x + self.image.get_width() >= sprite.position_x and \
                         self.position_x <= sprite.position_x + sprite.image.get_width():
                     type_of_intersection_y = "top"
-                # if sprite.position_y >= self.position_y >= sprite.position_y - sprite.image.get_height() - 2 and \
-                """print(sprite.position_y >= self.position_y >= sprite.position_y - sprite.image.get_height() + 1, " ",
-                      self.position_x + self.image.get_width() >= sprite.position_x, " ",
-                      self.position_x <= sprite.position_x + sprite.image.get_width())"""
                 if sprite.position_y >= self.position_y >= sprite.position_y - sprite.image.get_height() - 2 and \
                         self.position_x + self.image.get_width() >= sprite.position_x and \
                         self.position_x <= sprite.position_x + sprite.image.get_width():
@@ -236,24 +216,11 @@ class Character(Entity):
                 if sprite.position_y >= self.position_y >= sprite.position_y - sprite.image.get_height() + 2 and \
                         sprite.position_x < self.position_x:
                     type_of_intersection_x = "left"
-                    # print("left", self.position_x, self.position_y)
                 if sprite.position_y >= self.position_y >= sprite.position_y - sprite.image.get_height() + 2 and \
-                        sprite.position_x > self.position_x :
-                        # sprite.position_x < self.position_x + self.image.get_width():
+                        sprite.position_x > self.position_x:
                     type_of_intersection_x = "right"
-                    # print("right", self.position_x, self.position_y, "|", sprite.position_x, sprite.position_y)
 
                 intersections.append({"sprite": sprite,
                                       "type_y": type_of_intersection_y,
                                       "type_x": type_of_intersection_x})
-        # print("give:", intersections)
         return intersections
-
-    def animate(self):
-        self.current_image += 0.2
-        if self.current_image >= len(self.set_of_images):
-            self.current_image = 0
-        self.image = self.set_of_images[int(self.current_image)]
-        self.update_sprite()
-
-

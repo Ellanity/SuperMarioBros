@@ -35,7 +35,7 @@ class Level:
         self.sceneries_type_names = ["BrickPlain", "Bush1", "Bush2", "Bush3",
                                      "Cloud1", "Cloud2", "Cloud3", "HillSmall", "HillLarge"]
         self.solids_type_names = ["Floor", "Stone", "Brick", "PipeHorizontal",
-                                  "PipeVertical", "PipeCapHorizontal", "PipeCapVertical", "PipeCrossroad"]
+                                  "PipeVertical", "PipeCapHorizontal", "PipeCapVertical", "PipeCrossroad", "Block"]
         self.items_type_names = list()
         self.characters_type_names = list()
 
@@ -44,7 +44,7 @@ class Level:
 
     def draw_player(self):
         self.player.state["move"] = False
-        self.player.animate()
+        self.player.animate(animation_speed=0.2)
         pos_x_to_draw = self.player.position_x - self.coordinate_level_left_border
         pos_y_to_draw = self.player.position_y
         self.window.blit(self.player.image, (pos_x_to_draw, pos_y_to_draw))
@@ -57,6 +57,7 @@ class Level:
             if left_border < entity.position_x < right_border:
                 pos_x_to_draw = entity.position_x - self.coordinate_level_left_border
                 pos_y_to_draw = entity.position_y
+                entity.animate(animation_speed=0.1)
                 self.window.blit(entity.image, (pos_x_to_draw, pos_y_to_draw))
 
     def frame_rendering(self):
@@ -114,9 +115,9 @@ class Level:
                 # Defining the entity group
                 for entity in area["creation"]:
                     if "type" in entity:
-                        image_name = self.get_entity_image_by_type_and_suffix(entity["type"], image_suffix)
-                        self.load_entity_from_file(image_name=image_name, type_name=entity["type"],
-                                                   coords=(entity["x"], entity["y"]))
+                        # image_name = self.get_entity_image_by_type_and_suffix(entity["type"], image_suffix)
+                        new_entity = self.get_entity_from_file(json_data=entity, image_suffix=image_suffix)
+                        self.add_entity(new_entity)
                     if "macro" in entity:
                         image_name = self.get_entity_image_by_type_and_suffix(entity["macro"], image_suffix)
                         # for row in range(0, -int(entity["quantity_vertical"]), -1):
@@ -133,8 +134,9 @@ class Level:
                                 block_height = image.get_height()
                                 x = column * block_width + entity["x"]
                                 y = row * block_height + entity["y"]
-                                self.load_entity_from_file(image_name=image_name, type_name=entity["macro"],
-                                                           coords=(x, y))
+                                new_entity = self.get_entity_from_file(json_data=entity, image_suffix=image_suffix,
+                                                                       coords=(x, y))
+                                self.add_entity(new_entity)
 
     def get_entity_image_by_type_and_suffix(self, type_name, image_suffix):
         image_pre_designation = type_name + image_suffix
@@ -149,25 +151,42 @@ class Level:
             image_name = f"img/Item/{image_pre_designation}"
         return image_name
 
-    def load_entity_from_file(self, image_name, type_name, coords):
+    def get_entity_from_file(self, json_data, image_suffix, coords=None):
         new_entity = None
+        image_name = ""
+        type_name = ""
+        if "type" in json_data:
+            image_name = self.get_entity_image_by_type_and_suffix(json_data["type"], image_suffix)
+            type_name = json_data["type"]
+        if "macro" in json_data:
+            image_name = self.get_entity_image_by_type_and_suffix(json_data["macro"], image_suffix)
+            type_name = json_data["macro"]
+
         if type_name in self.solids_type_names:
             new_entity = Solid(self, image_name, type_name)
-        if type_name in self.characters_type_names:
+        elif type_name in self.characters_type_names:
             new_entity = Character(self, image_name, type_name)
-        if type_name in self.sceneries_type_names:
+        elif type_name in self.sceneries_type_names:
             new_entity = Scenery(self, image_name, type_name)
-        if type_name in self.items_type_names:
+        elif type_name in self.items_type_names:
             new_entity = Item(self, image_name, type_name)
 
         # for convenience, the entity file is stored with a coordinate system,
         # where the axes start in the lower left corner
         # Therefore, the Y axis turns over
+        if coords is None:
+            coords = (json_data["x"], json_data["y"])
         new_entity.position_x = coords[0]
         new_entity.position_y = int(self.window.get_height() - coords[1] - new_entity.image.get_height())
-        self.add_entity(new_entity)
-        print(f"entity: {type_name}, {image_name}, "
-              f"x: {new_entity.position_x} y: {new_entity.position_y}")
+
+        if "content" in json_data:
+            new_entity.content = json_data["content"]
+        if "quantity_of_content" in json_data:
+            new_entity.content = json_data["quantity_of_content"]
+
+        # print(f"entity: {type_name}, {image_name}, "
+        #      f"x: {new_entity.position_x} y: {new_entity.position_y}")
+        return new_entity
 
     def add_entity(self, entity):
         if entity.type_name in self.solids_type_names:
