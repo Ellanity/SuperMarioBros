@@ -43,10 +43,11 @@ class Level:
         self.window.fill((153, 204, 255))
 
     def draw_player(self):
+        self.player.state["move"] = False
+        self.player.animate()
         pos_x_to_draw = self.player.position_x - self.coordinate_level_left_border
         pos_y_to_draw = self.player.position_y
         self.window.blit(self.player.image, (pos_x_to_draw, pos_y_to_draw))
-        # screen.blit(self.player.image, (self.player.position_x, self.player.position_y))
 
     # Use for drawing any list of images
     def draw_group_of_entities(self, entities):

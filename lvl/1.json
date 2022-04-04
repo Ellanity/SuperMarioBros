@@ -7,6 +7,19 @@
         "setting": "Overworld",
         "creation": [
             {
+                "macro": "PipeVertical",
+                "x": 300,
+                "y": 96,
+                "quantity_horizontal": 1,
+                "quantity_vertical": 2
+            },{
+                "type": "PipeCapVertical",
+                "x": 294,
+                "y": 192
+            },
+
+
+            {
                 "macro": "Floor",
                 "x": 0,
                 "y": 0,
