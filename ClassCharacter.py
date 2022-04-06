@@ -93,40 +93,6 @@ class Character(Entity):
         for intersection in intersections:
             if intersection["type_y"] == "top":
                 roof = True
-            # for the first time in my life I'm doing a bug on purpose
-            #
-            # There's another bug that I didn't want to do
-            # if there are two blocks above the hero, he will jump, the first one will say that he crashed,
-            # and there is no roof anymore, and the character will pass through the second block
-            if self.type_name == "Player":
-                if intersection["type_y"] == "top":
-                    position_x_before = self.position_x
-                    if self.position_x + self.image.get_width() < intersection["sprite"].position_x + (
-                            self.image.get_width() / 2 - 5):
-                        self.position_x -= (self.position_x + self.image.get_width() -
-                                            intersection["sprite"].position_x)
-                        # self.update_sprite()
-                        roof = False
-                    if self.position_x > intersection["sprite"].position_x + intersection["sprite"].image.get_width() -\
-                            (self.image.get_width() / 2 - 5):
-                        self.position_x += (intersection["sprite"].position_x + intersection[
-                            "sprite"].image.get_width() - self.position_x)
-                        # self.update_sprite()
-                        roof = False
-                    # this should fix the error described above \/
-                    self.update_sprite()
-                    new_intersections = self.get_intersections(self.level.solids)
-                    for new_intersection in new_intersections:
-                        if new_intersection["type_y"] == "top":
-                            self.position_x = position_x_before
-                            self.update_sprite()
-                            roof = True
-                            break
-                    # need check first top intersection to destroy or animate block
-                    if intersection["sprite"].type_name == "Brick":
-                        print(intersection["sprite"].position_x)
-                        # intersection["sprite"].animate(animation_speed=1)
-
             # when the character has a fulcrum after jumping, he can jump again
             if intersection["type_y"] == "bottom":
                 self.position_y = intersection["sprite"].position_y - self.image.get_height()
@@ -172,7 +138,13 @@ class Character(Entity):
                 self.position_y = intersection["sprite"].position_y - self.image.get_height()
                 self.update_sprite()
                 have_fulcrum = True
-                break
+                # break
+            """if intersection["type_x"] == "right":
+                self.position_x = intersection["sprite"].position_y - self.image.get_width()
+                self.update_sprite()
+            if intersection["type_x"] == "left":
+                self.position_x = intersection["sprite"].position_y + intersection["sprite"].image.get_width()
+                self.update_sprite()"""
 
         if not have_fulcrum:
             self.position_y += self.jump_speed / 2
@@ -224,3 +196,6 @@ class Character(Entity):
                                       "type_y": type_of_intersection_y,
                                       "type_x": type_of_intersection_x})
         return intersections
+
+    def interaction_with_entity(self, entity, intersection_x, intersection_y):
+        pass

@@ -12,6 +12,7 @@ clock = pygame.time.Clock()
 def main():
     lvl = Level(screen)
     lvl.load_level_from_file("lvl/1.json")
+    time = lvl.time
 
     while True:
         for event in pygame.event.get():
@@ -21,7 +22,6 @@ def main():
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_UP:
                     lvl.player.movement_fall_after_jump()
-                    # lvl.player.state["up"] = False
         # keys
         if pygame.key.get_pressed()[K_RIGHT]:
             lvl.player.movement_right(cant_go_beyond_screen=True)

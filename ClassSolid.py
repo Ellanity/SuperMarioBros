@@ -9,16 +9,25 @@ class Solid(Entity):
         self.load_sets_of_images()
 
         # jump starter pack
-        self.jump_speed = 30
-        self.max_jump_height = 150
+        self.jump_speed = 10
+        self.max_jump_height = 15
         self.start_jump_height = 0
         self.jumped_up = False
+        self.moved_up = False
+        # anim
+        self.animation_speed = 0.1
 
     def update_sprite(self):
         path_to_sprite = "img/Solid"
         if self.type_name == "Block" and self.content is not None:
             path_to_sprite += "/Block"
             if self.quantity_of_content != 0:
+                self.set_of_images = self.sets_of_images[f"{path_to_sprite}/Content"]
+            else:
+                self.set_of_images = self.sets_of_images[f"{path_to_sprite}/NoContent"]
+        if self.type_name == "Brick" and self.content is not None:
+            path_to_sprite += "/Brick"
+            if (self.quantity_of_content > 0 and len(self.content) > 0) or len(self.content) <= 0:
                 self.set_of_images = self.sets_of_images[f"{path_to_sprite}/Content"]
             else:
                 self.set_of_images = self.sets_of_images[f"{path_to_sprite}/NoContent"]
@@ -29,26 +38,19 @@ class Solid(Entity):
     def load_sets_of_images(self):
         try:
             path_to_sprite = "img/Solid"
+            # Block
             self.sets_of_images[f"{path_to_sprite}/Block/Content"] = \
                 [pygame.image.load(f"{path_to_sprite}/Block/{i}.png") for i in range(1, 5)]
             self.sets_of_images[f"{path_to_sprite}/Block/NoContent"] = \
                 [pygame.image.load(f"{path_to_sprite}/Block/5.png")]
+            # Brick
+            self.sets_of_images[f"{path_to_sprite}/Brick/Content"] = \
+                [pygame.image.load(f"{path_to_sprite}/Brick/1.png")]
+            self.sets_of_images[f"{path_to_sprite}/Brick/NoContent"] = \
+                [pygame.image.load(f"{path_to_sprite}/Brick/2.png")]
         except Exception as ex:
             print(ex)
 
-    # it does not work
-    def movement_up(self):
-        if not self.jumped_up:
-            if self.start_jump_height == 0:
-                self.start_jump_height = self.position_y
-            elif self.start_jump_height - self.position_y <= self.max_jump_height:
-                self.position_y -= self.jump_speed
-            else:
-                self.jumped_up = True
-        else:
-            if self.position_y <= self.start_jump_height:
-                self.position_y += self.jump_speed
-            else:
-                self.position_y = self.start_jump_height
-                self.start_jump_height = 0
-        self.update_sprite()
+    def action(self):
+        if self.moved_up:
+            self.movement_up()

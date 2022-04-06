@@ -10,8 +10,12 @@
                 "type": "Block",
                 "x": 768,
                 "y": 240,
-                "content": "coin",
-                "quantity_of_content": 0
+                "content": {
+                    "type": "Coin",
+                    "x": 780,
+                    "y": 240
+                },
+                "quantity_of_content": 1
             },{
                 "type": "Brick",
                 "x": 960,
@@ -20,8 +24,12 @@
                 "type": "Block",
                 "x": 1008,
                 "y": 240,
-                "content": "coin",
-                "quantity_of_content": 0
+                "content": {
+                    "type": "Coin",
+                    "x": 1020,
+                    "y": 240
+                },
+                "quantity_of_content": 1
             },{
                 "type": "Brick",
                 "x": 1056,
@@ -30,8 +38,12 @@
                 "type": "Block",
                 "x": 1104,
                 "y": 240,
-                "content": "coin",
-                "quantity_of_content": 0
+                "content": {
+                    "type": "Coin",
+                    "x": 1116,
+                    "y": 240
+                },
+                "quantity_of_content": 1
             },{
                 "type": "Brick",
                 "x": 1152,
@@ -40,8 +52,180 @@
                 "type": "Block",
                 "x": 1056,
                 "y": 432,
-                "content": "coin",
-                "quantity_of_content": 0
+                "content": {
+                    "type": "Coin",
+                    "x": 1068,
+                    "y": 432
+                },
+                "quantity_of_content": 1
+            },{
+                "type": "Brick",
+                "x": 3696,
+                "y": 240
+            },{
+                "type": "Block",
+                "x": 3744,
+                "y": 240,
+                "content": {
+                    "type": "Coin",
+                    "x": 3756,
+                    "y": 240
+                },
+                "quantity_of_content": 1
+            },{
+                "type": "Brick",
+                "x": 3792,
+                "y": 240
+            },{
+                "macro": "Brick",
+                "x": 3840,
+                "y": 432,
+                "quantity_horizontal": 8,
+                "quantity_vertical": 1
+            },{
+                "macro": "Brick",
+                "x": 4368,
+                "y": 432,
+                "quantity_horizontal": 3,
+                "quantity_vertical": 1
+            },{
+                "type": "Block",
+                "x": 4512,
+                "y": 432,
+                "content": {
+                    "type": "Coin",
+                    "x": 4524,
+                    "y": 432
+                },
+                "quantity_of_content": 1
+            },{
+                "type": "Brick",
+                "x": 4512,
+                "y": 240,
+                "content": {
+                    "type": "Coin",
+                    "x": 4524,
+                    "y": 240
+                },
+                "quantity_of_content": 10
+            },{
+                "type": "Brick",
+                "x": 4800,
+                "y": 240
+            },{
+                "type": "Block",
+                "x": 4848,
+                "y": 240,
+                "content": {
+                    "type": "Coin",
+                    "x": 4860,
+                    "y": 240
+                },
+                "quantity_of_content": 1
+            },{
+                "type": "Block",
+                "x": 5088,
+                "y": 240,
+                "content": {
+                    "type": "Coin",
+                    "x": 5100,
+                    "y": 240
+                },
+                "quantity_of_content": 1
+            },{
+                "type": "Block",
+                "x": 5232,
+                "y": 240,
+                "content": {
+                    "type": "Coin",
+                    "x": 5244,
+                    "y": 240
+                },
+                "quantity_of_content": 1
+            },{
+                "type": "Block",
+                "x": 5232,
+                "y": 432,
+                "content": {
+                    "type": "Coin",
+                    "x": 5244,
+                    "y": 432
+                },
+                "quantity_of_content": 1
+            },{
+                "type": "Block",
+                "x": 5376,
+                "y": 240,
+                "content": {
+                    "type": "Coin",
+                    "x": 5388,
+                    "y": 240
+                },
+                "quantity_of_content": 1
+            },{
+                "type": "Brick",
+                "x": 5664,
+                "y": 240
+            },{
+                "macro": "Brick",
+                "x": 5808,
+                "y": 432,
+                "quantity_horizontal": 3,
+                "quantity_vertical": 1
+            },{
+                "type": "Brick",
+                "x": 6144,
+                "y": 432
+            },{
+                "type": "Block",
+                "x": 6192,
+                "y": 432,
+                "content": {
+                    "type": "Coin",
+                    "x": 6204,
+                    "y": 432
+                },
+                "quantity_of_content": 1
+            },{
+                "type": "Block",
+                "x": 6240,
+                "y": 432,
+                "content": {
+                    "type": "Coin",
+                    "x": 6252,
+                    "y": 432
+                },
+                "quantity_of_content": 1
+            },{
+                "type": "Brick",
+                "x": 6288,
+                "y": 432
+            },{
+                "macro": "Brick",
+                "x": 6192,
+                "y": 240,
+                "quantity_horizontal": 2,
+                "quantity_vertical": 1
+            },{
+                "macro": "Brick",
+                "x": 8064,
+                "y": 240,
+                "quantity_horizontal": 2,
+                "quantity_vertical": 1
+            },{
+                "type": "Block",
+                "x": 8160,
+                "y": 240,
+                "content": {
+                    "type": "Coin",
+                    "x": 8172,
+                    "y": 240
+                },
+                "quantity_of_content": 1
+            },{
+                "type": "Brick",
+                "x": 8208,
+                "y": 240
             },
 
             {

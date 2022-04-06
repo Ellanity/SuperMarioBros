@@ -12,7 +12,8 @@ class Level:
         # Main window, to draw everything there is
         self.window = window
         self.data = None
-
+        self.time = 0
+        self.time_left = 0
         # Two coordinate systems
         #
         # the first system is the coordinates of the main window (to draw)
@@ -36,7 +37,7 @@ class Level:
                                      "Cloud1", "Cloud2", "Cloud3", "HillSmall", "HillLarge"]
         self.solids_type_names = ["Floor", "Stone", "Brick", "PipeHorizontal",
                                   "PipeVertical", "PipeCapHorizontal", "PipeCapVertical", "PipeCrossroad", "Block"]
-        self.items_type_names = list()
+        self.items_type_names = ["Coin"]
         self.characters_type_names = list()
 
     def draw_background(self):
@@ -57,8 +58,29 @@ class Level:
             if left_border < entity.position_x < right_border:
                 pos_x_to_draw = entity.position_x - self.coordinate_level_left_border
                 pos_y_to_draw = entity.position_y
-                entity.animate(animation_speed=0.1)
+                entity.animate()
                 self.window.blit(entity.image, (pos_x_to_draw, pos_y_to_draw))
+
+    def display_stats(self, score, time, world, coins, lives):
+        self.display_stat("SCORE", str(score), 1, 5)
+        self.display_stat("TIME",  str(time),  2, 5)
+        self.display_stat("WORLD", str(world), 3, 5)
+        self.display_stat("COINS", str(coins), 4, 5)
+        self.display_stat("LIVES", str(lives), 5, 5)
+
+    def display_stat(self, stat_name, stat, serial_number, quantity_stats):
+        font = pygame.font.Font("font/ARCADECLASSIC.TTF", 36)
+        white = (255, 255, 255)
+        block_width = self.window.get_width() / quantity_stats
+        text_stat_name = font.render(stat_name, True, white)
+        text_stat_count = font.render(stat, True, white)
+
+        pos_x_for_text_stat_name = block_width * (serial_number - 1) + ((block_width - text_stat_name.get_width()) / 2)
+        pos_x_for_text_stat_count = block_width * (serial_number - 1) + ((block_width - text_stat_count.get_width()) / 2)
+
+        self.window.blit(text_stat_name, (pos_x_for_text_stat_name, 10))
+        self.window.blit(text_stat_count, (pos_x_for_text_stat_count, 36))
+
 
     def frame_rendering(self):
         self.draw_background()
@@ -67,6 +89,7 @@ class Level:
         self.draw_group_of_entities(self.solids)
         self.draw_group_of_entities(self.characters)
         self.draw_player()
+        self.display_stats(self.player.score, self.time_left, self.data["name"], self.player.coins, self.player.lives)
 
     def physics(self):
         self.player.physics()
@@ -76,13 +99,13 @@ class Level:
         self.player.update_sprite()
 
         for solid in self.solids:
-            solid.update_sprite()
+            solid.action()
         for character in self.characters:
-            character.update_sprite()
+            character.action()
         for scenery in self.sceneries:
-            scenery.update_sprite()
+            scenery.action()
         for item in self.items:
-            item.update_sprite()
+            item.action()
 
         self.physics()
 
@@ -104,6 +127,8 @@ class Level:
         # Convert data to level objects
         if self.data is not None:
             self.length = self.data["length"]
+            if self.data["time"] != "Infinity":
+                self.time = int(self.data["time"])
             # Can consist of several zones(areas)
             for area in self.data["areas"]:
                 # Depending on the zone, the colors of the images change, so we define the suffix
@@ -175,17 +200,17 @@ class Level:
         # where the axes start in the lower left corner
         # Therefore, the Y axis turns over
         if coords is None:
-            coords = (json_data["x"], json_data["y"])
+            coords = (int(json_data["x"]), int(json_data["y"]))
         new_entity.position_x = coords[0]
         new_entity.position_y = int(self.window.get_height() - coords[1] - new_entity.image.get_height())
 
-        if "content" in json_data:
-            new_entity.content = json_data["content"]
         if "quantity_of_content" in json_data:
-            new_entity.content = json_data["quantity_of_content"]
+            new_entity.quantity_of_content = int(json_data["quantity_of_content"])
+        for i in range(0, new_entity.quantity_of_content):
+            if "content" in json_data:
+                new_entity.content.append(self.get_entity_from_file(json_data["content"], image_suffix))
+                self.add_entity(new_entity.content[-1])
 
-        # print(f"entity: {type_name}, {image_name}, "
-        #      f"x: {new_entity.position_x} y: {new_entity.position_y}")
         return new_entity
 
     def add_entity(self, entity):
@@ -197,3 +222,6 @@ class Level:
             self.sceneries.append(entity)
         if entity.type_name in self.items_type_names:
             self.items.append(entity)
+
+    def destroy_entity(self):
+        pass
