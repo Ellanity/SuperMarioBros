@@ -14,7 +14,7 @@ class Solid(Entity):
         self.start_jump_height = 0
         self.jumped_up = False
         self.moved_up = False
-        # anim
+        # animate
         self.animation_speed = 0.1
 
     def update_sprite(self):
@@ -22,34 +22,18 @@ class Solid(Entity):
         if self.type_name == "Block" and self.content is not None:
             path_to_sprite += "/Block"
             if self.quantity_of_content != 0:
-                self.set_of_images = self.sets_of_images[f"{path_to_sprite}/Content"]
+                self.set_of_images = self.level.sets_of_images[f"{path_to_sprite}/Content"]
             else:
-                self.set_of_images = self.sets_of_images[f"{path_to_sprite}/NoContent"]
+                self.set_of_images = self.level.sets_of_images[f"{path_to_sprite}/NoContent"]
         if self.type_name == "Brick" and self.content is not None:
             path_to_sprite += "/Brick"
             if (self.quantity_of_content > 0 and len(self.content) > 0) or len(self.content) <= 0:
-                self.set_of_images = self.sets_of_images[f"{path_to_sprite}/Content"]
+                self.set_of_images = self.level.sets_of_images[f"{path_to_sprite}/Content"]
             else:
-                self.set_of_images = self.sets_of_images[f"{path_to_sprite}/NoContent"]
+                self.set_of_images = self.level.sets_of_images[f"{path_to_sprite}/NoContent"]
 
         self.recalculate_the_mask()
         self.recalculate_the_rect()
-
-    def load_sets_of_images(self):
-        try:
-            path_to_sprite = "img/Solid"
-            # Block
-            self.sets_of_images[f"{path_to_sprite}/Block/Content"] = \
-                [pygame.image.load(f"{path_to_sprite}/Block/{i}.png") for i in range(1, 5)]
-            self.sets_of_images[f"{path_to_sprite}/Block/NoContent"] = \
-                [pygame.image.load(f"{path_to_sprite}/Block/5.png")]
-            # Brick
-            self.sets_of_images[f"{path_to_sprite}/Brick/Content"] = \
-                [pygame.image.load(f"{path_to_sprite}/Brick/1.png")]
-            self.sets_of_images[f"{path_to_sprite}/Brick/NoContent"] = \
-                [pygame.image.load(f"{path_to_sprite}/Brick/2.png")]
-        except Exception as ex:
-            print(ex)
 
     def action(self):
         if self.moved_up:

@@ -1,4 +1,3 @@
-import pygame
 from ClassEntity import Entity
 
 
@@ -17,7 +16,7 @@ class Character(Entity):
         self.current_image = 0
         self.state = {"move": False, "up": False, "death": False}
 
-    def movement_right(self, cant_go_beyond_screen=False):
+    """def movement_right(self, cant_go_beyond_screen=False):
         # sprite
         self.state["move"] = True
         if not self.turned_right:
@@ -84,6 +83,7 @@ class Character(Entity):
             if self.position_x < self.level.coordinate_level_left_border:
                 self.position_x = self.level.coordinate_level_left_border
         self.update_sprite()
+"""
 
     def movement_up(self):
         # I think the roof variable can be removed and the code rewritten
@@ -129,73 +129,8 @@ class Character(Entity):
     def movement_fall_after_jump(self):
         self.jumped_up = True
 
-    def physics(self):
-        intersections = self.get_intersections(self.level.solids)
-        have_fulcrum = False
-
-        for intersection in intersections:
-            if intersection["type_y"] == "bottom":
-                self.position_y = intersection["sprite"].position_y - self.image.get_height()
-                self.update_sprite()
-                have_fulcrum = True
-                # break
-            """if intersection["type_x"] == "right":
-                self.position_x = intersection["sprite"].position_y - self.image.get_width()
-                self.update_sprite()
-            if intersection["type_x"] == "left":
-                self.position_x = intersection["sprite"].position_y + intersection["sprite"].image.get_width()
-                self.update_sprite()"""
-
-        if not have_fulcrum:
-            self.position_y += self.jump_speed / 2
-            self.update_sprite()
-            intersections = self.get_intersections(self.level.solids)
-            for intersection in intersections:
-                if intersection["type_y"] == "bottom":
-                    self.position_y = intersection["sprite"].position_y - self.image.get_height()
-                    self.state["up"] = False
-                    # self.position_y = intersection["sprite"].position_y - intersection["sprite"].image.get_height()- 1
-                    self.update_sprite()
-                    break
-        self.update_sprite()
-
     def movement_down(self):
         pass  # entrance to the underworld through a pipe
-
-    def get_intersections(self, sprites_group):
-        intersections = list()
-        for sprite in sprites_group:
-            # pygame.sprite.collide_mask(self, sprite)
-            # here it was possible to make intersections by masks,
-            # but then something bad happens during the animation
-            if pygame.sprite.collide_rect(self, sprite):
-                ##########################################################################
-                ###########          !!!    Congratulations     !!!          #############
-                ###########          !!!       It works         !!!          #############
-                ##########################################################################
-                type_of_intersection_y = str()
-                type_of_intersection_x = str()
-                # vertical intersections
-                if self.position_y >= sprite.position_y >= self.position_y - self.image.get_height() and \
-                        self.position_x + self.image.get_width() >= sprite.position_x and \
-                        self.position_x <= sprite.position_x + sprite.image.get_width():
-                    type_of_intersection_y = "top"
-                if sprite.position_y >= self.position_y >= sprite.position_y - sprite.image.get_height() - 2 and \
-                        self.position_x + self.image.get_width() >= sprite.position_x and \
-                        self.position_x <= sprite.position_x + sprite.image.get_width():
-                    type_of_intersection_y = "bottom"
-                # horizontal
-                if sprite.position_y >= self.position_y >= sprite.position_y - sprite.image.get_height() + 2 and \
-                        sprite.position_x < self.position_x:
-                    type_of_intersection_x = "left"
-                if sprite.position_y >= self.position_y >= sprite.position_y - sprite.image.get_height() + 2 and \
-                        sprite.position_x > self.position_x:
-                    type_of_intersection_x = "right"
-
-                intersections.append({"sprite": sprite,
-                                      "type_y": type_of_intersection_y,
-                                      "type_x": type_of_intersection_x})
-        return intersections
 
     def interaction_with_entity(self, entity, intersection_x, intersection_y):
         pass

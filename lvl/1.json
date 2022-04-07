@@ -25,8 +25,8 @@
                 "x": 1008,
                 "y": 240,
                 "content": {
-                    "type": "Coin",
-                    "x": 1020,
+                    "type": "MushroomBig",
+                    "x": 1008,
                     "y": 240
                 },
                 "quantity_of_content": 1

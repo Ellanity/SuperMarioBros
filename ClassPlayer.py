@@ -25,9 +25,13 @@ class Player(Character):
         self.jumped_up = False
 
         self.position_x = 0
-        self.position_y = self.level.window.get_height() - 97
+        self.position_y = self.level.window.get_height() - 145
 
-        self.state = {"large": False, "fire": False, "move": False, "up": False, "death": False}
+        self.state = {"large": False,
+                      "fire": False,
+                      "move": False,
+                      "up": False,
+                      "death": False}
         self.load_sets_of_images()
 
     def movement_up(self):
@@ -64,15 +68,15 @@ class Player(Character):
                 roof = True
                 position_x_before = self.position_x
                 # right
-                if self.position_x + self.image.get_width() < intersection["sprite"].position_x + (
-                        self.image.get_width() / 2 - 5):
+                if self.position_x + self.image.get_width() < intersection["sprite"].position_x + 10:
+                        # (self.image.get_width() / 2 - 10):
                     self.position_x -= (self.position_x + self.image.get_width() -
                                         intersection["sprite"].position_x)
                     roof = False
                     action_performed = True
                 # left
-                if self.position_x > intersection["sprite"].position_x + intersection["sprite"].image.get_width() -\
-                        (self.image.get_width() / 2 - 5):
+                if self.position_x > intersection["sprite"].position_x + intersection["sprite"].image.get_width() - 10:
+                        # (self.image.get_width() / 2 - 10):
                     self.position_x += (intersection["sprite"].position_x + intersection[
                         "sprite"].image.get_width() - self.position_x)
                     roof = False
@@ -91,6 +95,7 @@ class Player(Character):
                     self.interaction_with_entity(entity=intersection["sprite"],
                                                  intersection_x=intersection["type_x"],
                                                  intersection_y=intersection["type_y"])
+                    # self.position_x = position_x_before
 
             # when the character has a fulcrum after jumping, he can jump again
             if intersection["type_y"] == "bottom":
@@ -126,6 +131,13 @@ class Player(Character):
         self.update_sprite()
 
     def update_sprite(self):
+
+        path_before = ""
+        for set_ in self.level.sets_of_images:
+            if self.level.sets_of_images[set_] == self.set_of_images:
+                path_before = set_
+                break
+
         path_to_sprite = "img/Mario"
         # size
         if self.state["large"] is True:
@@ -137,24 +149,27 @@ class Player(Character):
             path_to_sprite += "/Fire"
         # move
         if self.state["up"] is True:
-            self.set_of_images = self.sets_of_images[f"{path_to_sprite}/Up"]
+            self.set_of_images = self.level.sets_of_images[f"{path_to_sprite}/Up"]
         elif self.state["move"] is True:
-            self.set_of_images = self.sets_of_images[f"{path_to_sprite}/Move"]
+            self.set_of_images = self.level.sets_of_images[f"{path_to_sprite}/Move"]
         else:
-            self.set_of_images = self.sets_of_images[f"{path_to_sprite}/Stay"]
+            self.set_of_images = self.level.sets_of_images[f"{path_to_sprite}/Stay"]
         if not self.turned_right:
             self.set_of_images = [pygame.transform.flip(image, True, False) for image in self.set_of_images]
 
+        try:
+            if path_before.find("Small") != -1 and path_to_sprite.find("Large") != -1:
+                for intersection in self.get_intersections(self.level.solids):
+                    if intersection["type_y"] == "bottom":
+                        self.position_y -= self.level.sets_of_images[path_to_sprite][0].get_height() - \
+                                           self.level.sets_of_images[path_before][0].get_height()
+        except Exception as ex:
+            pass
+            # print(ex)
+        # if path_to_sprite.find("Large")
+
         self.recalculate_the_mask()
         self.recalculate_the_rect()
-
-    def load_sets_of_images(self):
-        path_to_sprite = "img/Mario"
-        self.sets_of_images[f"{path_to_sprite}/Small/Up"] = [pygame.image.load(f"{path_to_sprite}/Small/5.png")]
-        self.sets_of_images[f"{path_to_sprite}/Small/Move"] = [pygame.image.load(f"{path_to_sprite}/Small/{i}.png") for
-                                                               i in range(1, 5)]
-        self.sets_of_images[f"{path_to_sprite}/Small/Stay"] = [pygame.image.load(f"{path_to_sprite}/Small/1.png")]
-        self.sets_of_images[f"{path_to_sprite}/Small/Death"] = [pygame.image.load(f"{path_to_sprite}/Small/0.png")]
 
     def interaction_with_entity(self, entity, intersection_x, intersection_y):
 
@@ -163,7 +178,7 @@ class Player(Character):
                 self.get_item(entity)
             if not self.state["large"] and not entity.moved_up and len(entity.content) <= 0:
                 entity.moved_up = True
-            if self.state["large"]:
+            if self.state["large"] and entity.content is None:
                 self.level.destroy_entity(entity)
 
         if entity.type_name == "Block":
@@ -174,15 +189,43 @@ class Player(Character):
         if not entity.moved_up:
             entity.moved_up = True
             entity.quantity_of_content -= 1
+            # coin
             if entity.content[entity.quantity_of_content].type_name == "Coin":
                 entity.content[entity.quantity_of_content].moved_up = True
                 self.coins += 1
                 self.score += 200
-            for content_entity in entity.content:
-                try:
-                    if content_entity != entity.content[entity.quantity_of_content] and not content_entity.moved_up:
-                        content_entity.moved_up = True
-                        content_entity.data_to_jump = \
-                            {"max_jump_height": entity.max_jump_height, "jump_speed": entity.jump_speed}
-                except Exception as ex:
-                    print(ex)
+                for content_entity in entity.content:
+                    try:
+                        if content_entity != entity.content[entity.quantity_of_content] and not content_entity.moved_up:
+                            content_entity.moved_up = True
+                            content_entity.data_to_jump = \
+                                {"max_jump_height": entity.max_jump_height, "jump_speed": entity.jump_speed}
+                    except Exception as ex:
+                        print(ex)
+            # other items
+            if entity.content[entity.quantity_of_content].type_name == "MushroomBig":
+                item = entity.content[entity.quantity_of_content]
+                item.moved_up = True
+                item.state["move"] = True
+                item.start_jump_height = entity.position_y - 48
+                #
+                item.turned_right = False
+                item.max_jump_height = 0
+                item.jump_speed = 10
+                item.have_physics = True
+
+    def action(self):
+        # intersections
+        intersections_items = self.get_intersections(self.level.items)
+        intersections_solids = self.get_intersections(self.level.solids)
+        # print([item for item in intersections_items])
+        for intersection_item in intersections_items:
+            if intersection_item["sprite"].type_name == "MushroomBig":
+                touching_an_invisible_object = False
+                for intersection_solid in intersections_solids:
+                    if intersection_item["sprite"] in intersection_solid["sprite"].content:
+                        touching_an_invisible_object = True
+
+                if not touching_an_invisible_object:
+                    self.state["large"] = True
+                    self.update_sprite()

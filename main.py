@@ -12,7 +12,7 @@ clock = pygame.time.Clock()
 def main():
     lvl = Level(screen)
     lvl.load_level_from_file("lvl/1.json")
-    time = lvl.time
+    time_begin = lvl.time
 
     while True:
         for event in pygame.event.get():

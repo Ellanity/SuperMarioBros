@@ -37,8 +37,11 @@ class Level:
                                      "Cloud1", "Cloud2", "Cloud3", "HillSmall", "HillLarge"]
         self.solids_type_names = ["Floor", "Stone", "Brick", "PipeHorizontal",
                                   "PipeVertical", "PipeCapHorizontal", "PipeCapVertical", "PipeCrossroad", "Block"]
-        self.items_type_names = ["Coin"]
+        self.items_type_names = ["Coin", "MushroomBig", "MushroomLive", "FlowerFire"]
         self.characters_type_names = list()
+        #
+        self.sets_of_images = {}
+        self.load_sets_of_images()
 
     def draw_background(self):
         self.window.fill((153, 204, 255))
@@ -81,7 +84,6 @@ class Level:
         self.window.blit(text_stat_name, (pos_x_for_text_stat_name, 10))
         self.window.blit(text_stat_count, (pos_x_for_text_stat_count, 36))
 
-
     def frame_rendering(self):
         self.draw_background()
         self.draw_group_of_entities(self.sceneries)
@@ -96,16 +98,21 @@ class Level:
 
     def updating_independent_world_parameters(self):
 
+        self.player.action()
         self.player.update_sprite()
 
         for solid in self.solids:
             solid.action()
+            solid.update_sprite()
         for character in self.characters:
             character.action()
+            character.update_sprite()
         for scenery in self.sceneries:
             scenery.action()
+            scenery.update_sprite()
         for item in self.items:
             item.action()
+            item.update_sprite()
 
         self.physics()
 
@@ -223,5 +230,51 @@ class Level:
         if entity.type_name in self.items_type_names:
             self.items.append(entity)
 
-    def destroy_entity(self):
+    def destroy_entity(self, entity):
         pass
+
+    def load_sets_of_images(self):
+        try:
+            # Solids
+            path_to_sprite = "img/Solid"
+            # Block
+            self.sets_of_images[f"{path_to_sprite}/Block/Content"] = \
+                [pygame.image.load(f"{path_to_sprite}/Block/{i}.png") for i in range(1, 5)]
+            self.sets_of_images[f"{path_to_sprite}/Block/NoContent"] = \
+                [pygame.image.load(f"{path_to_sprite}/Block/5.png")]
+
+            # Brick
+            self.sets_of_images[f"{path_to_sprite}/Brick/Content"] = \
+                [pygame.image.load(f"{path_to_sprite}/Brick/1.png")]
+            self.sets_of_images[f"{path_to_sprite}/Brick/NoContent"] = \
+                [pygame.image.load(f"{path_to_sprite}/Brick/2.png")]
+
+            # Mario
+            path_to_sprite = "img/Mario"
+            self.sets_of_images[f"{path_to_sprite}/Small/Up"] = [pygame.image.load(f"{path_to_sprite}/Small/5.png")]
+            self.sets_of_images[f"{path_to_sprite}/Small/Move"] = \
+                [pygame.image.load(f"{path_to_sprite}/Small/{i}.png") for i in range(1, 5)]
+            self.sets_of_images[f"{path_to_sprite}/Small/Stay"] = [pygame.image.load(f"{path_to_sprite}/Small/1.png")]
+            self.sets_of_images[f"{path_to_sprite}/Small/Death"] = [pygame.image.load(f"{path_to_sprite}/Small/0.png")]
+
+            self.sets_of_images[f"{path_to_sprite}/Large/Up"] = [pygame.image.load(f"{path_to_sprite}/Large/5.png")]
+            self.sets_of_images[f"{path_to_sprite}/Large/Move"] = \
+                [pygame.image.load(f"{path_to_sprite}/Large/{i}.png") for i in range(1, 5)]
+            self.sets_of_images[f"{path_to_sprite}/Large/Stay"] = [pygame.image.load(f"{path_to_sprite}/Large/1.png")]
+            self.sets_of_images[f"{path_to_sprite}/Large/Death"] = [pygame.image.load(f"{path_to_sprite}/Small/0.png")]
+
+            # Items
+            path_to_sprite = "img/Item"
+            self.sets_of_images[f"{path_to_sprite}/Coin/Static"] = \
+                [pygame.image.load(f"{path_to_sprite}/Coin/{i}.png") for i in range(1, 5)]
+            self.sets_of_images[f"{path_to_sprite}/Coin/Animation"] = \
+                [pygame.image.load(f"{path_to_sprite}/Coin/3.png")]
+
+            self.sets_of_images[f"{path_to_sprite}/MushroomLive"] = \
+                [pygame.image.load(f"{path_to_sprite}/Mushroom/1.png")]
+            self.sets_of_images[f"{path_to_sprite}/MushroomBig"] = \
+                [pygame.image.load(f"{path_to_sprite}/Mushroom/2.png")]
+            self.sets_of_images[f"{path_to_sprite}/FlowerFire"] = \
+                [pygame.image.load(f"{path_to_sprite}/Flower/{i}.png") for i in range(1, 5)]
+        except Exception as ex:
+            print(ex)
