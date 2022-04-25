@@ -1,19 +1,38 @@
 import json
 import pygame
+import time
+import math
+
+
 from ClassPlayer import Player
 from ClassSolid import Solid
 from ClassItem import Item
 from ClassCharacter import Character
 from ClassScenery import Scenery
+from ClassParticle import Particle
+from ClassScore import Score
 
 
 class Level:
+
     def __init__(self, window):
         # Main window, to draw everything there is
         self.window = window
+
+        # common data
+        self.file_name = ""
         self.data = None
-        self.time = 0
+
+        # time
+        self.pause = False
+        self.time_start = 0
+        self.time_range = 0
+        self.time_pause_range = 0
+        self.time_pause_stop = 0
+        self.time_pause_start = 0
         self.time_left = 0
+        self.have_time = True
+
         # Two coordinate systems
         #
         # the first system is the coordinates of the main window (to draw)
@@ -29,6 +48,7 @@ class Level:
         self.solids = list()
         self.items = list()
         self.characters = list()
+        self.particles = list()
         self.player = Player(self)
 
         # Different entities have different names.
@@ -38,17 +58,18 @@ class Level:
         self.solids_type_names = ["Floor", "Stone", "Brick", "PipeHorizontal",
                                   "PipeVertical", "PipeCapHorizontal", "PipeCapVertical", "PipeCrossroad", "Block"]
         self.items_type_names = ["Coin", "MushroomBig", "MushroomLive", "FlowerFire"]
-        self.characters_type_names = list()
+        self.characters_type_names = ["Goomba"]
+        self.particles_type_names = ["BrickPart", "Score"]
         #
         self.sets_of_images = {}
         self.load_sets_of_images()
 
-    def draw_background(self):
-        self.window.fill((153, 204, 255))
+    def draw_background(self, color):
+        self.window.fill(color)
 
     def draw_player(self):
-        self.player.state["move"] = False
-        self.player.animate(animation_speed=0.2)
+        self.player.state["Move"] = False
+        self.player.animate()  # (animation_speed=0.2)
         pos_x_to_draw = self.player.position_x - self.coordinate_level_left_border
         pos_y_to_draw = self.player.position_y
         self.window.blit(self.player.image, (pos_x_to_draw, pos_y_to_draw))
@@ -64,9 +85,9 @@ class Level:
                 entity.animate()
                 self.window.blit(entity.image, (pos_x_to_draw, pos_y_to_draw))
 
-    def display_stats(self, score, time, world, coins, lives):
+    def display_stats(self, score, time_, world, coins, lives):
         self.display_stat("SCORE", str(score), 1, 5)
-        self.display_stat("TIME",  str(time),  2, 5)
+        self.display_stat("TIME",  str(time_), 2, 5)
         self.display_stat("WORLD", str(world), 3, 5)
         self.display_stat("COINS", str(coins), 4, 5)
         self.display_stat("LIVES", str(lives), 5, 5)
@@ -78,25 +99,44 @@ class Level:
         text_stat_name = font.render(stat_name, True, white)
         text_stat_count = font.render(stat, True, white)
 
-        pos_x_for_text_stat_name = block_width * (serial_number - 1) + ((block_width - text_stat_name.get_width()) / 2)
-        pos_x_for_text_stat_count = block_width * (serial_number - 1) + ((block_width - text_stat_count.get_width()) / 2)
+        pos_x_for_stat_name = block_width * (serial_number - 1) + ((block_width - text_stat_name.get_width()) / 2)
+        pos_x_for_stat_count = block_width * (serial_number - 1) + ((block_width - text_stat_count.get_width()) / 2)
 
-        self.window.blit(text_stat_name, (pos_x_for_text_stat_name, 10))
-        self.window.blit(text_stat_count, (pos_x_for_text_stat_count, 36))
+        self.window.blit(text_stat_name, (pos_x_for_stat_name, 10))
+        self.window.blit(text_stat_count, (pos_x_for_stat_count, 36))
 
     def frame_rendering(self):
-        self.draw_background()
+        if self.pause:
+            return
+
+        self.draw_background((153, 204, 255))
         self.draw_group_of_entities(self.sceneries)
         self.draw_group_of_entities(self.items)
         self.draw_group_of_entities(self.solids)
         self.draw_group_of_entities(self.characters)
+        self.draw_group_of_entities(self.particles)
         self.draw_player()
-        self.display_stats(self.player.score, self.time_left, self.data["name"], self.player.coins, self.player.lives)
 
-    def physics(self):
-        self.player.physics()
+        if not self.pause:
+            time_now = time.time()
+            self.time_left = self.time_range - (time_now - self.time_start) + self.time_pause_range
+            if self.time_left < 0:
+                self.time_left = 0
+
+        self.display_stats(self.player.score, int(self.time_left), self.data["name"],
+                           self.player.coins, self.player.lives)
+
+        if self.time_left <= 0:
+            if self.have_time:
+                self.player.state["Large"] = False
+                self.player.state["Fire"] = False
+                self.player.was_killed = True
+                self.have_time = False
+            self.player.death()
 
     def updating_independent_world_parameters(self):
+        if self.pause:
+            return
 
         self.player.action()
         self.player.update_sprite()
@@ -113,8 +153,9 @@ class Level:
         for item in self.items:
             item.action()
             item.update_sprite()
-
-        self.physics()
+        for particle in self.particles:
+            particle.action()
+            particle.update_sprite()
 
     def move_screen(self):
         # self.player.image.get_width() +
@@ -124,6 +165,8 @@ class Level:
                 self.coordinate_level_left_border += self.player.speed
 
     def load_level_from_file(self, file_name):
+        self.file_name = file_name
+
         # reading json from file
         try:
             with open(file_name, 'r') as file:
@@ -131,11 +174,17 @@ class Level:
         except Exception as ex:
             print(ex)
 
+        # player start pos
+        self.player.position_x = self.data["player"]["start_x"]
+        self.player.position_y = int(self.window.get_height() -
+                                     self.data["player"]["start_y"] - self.player.image.get_height())
+
         # Convert data to level objects
         if self.data is not None:
             self.length = self.data["length"]
             if self.data["time"] != "Infinity":
-                self.time = int(self.data["time"])
+                self.time_start = time.time()
+                self.time_range = int(self.data["time"])
             # Can consist of several zones(areas)
             for area in self.data["areas"]:
                 # Depending on the zone, the colors of the images change, so we define the suffix
@@ -155,20 +204,27 @@ class Level:
                         # for row in range(0, -int(entity["quantity_vertical"]), -1):
                         for row in range(int(entity["quantity_vertical"])):
                             for column in range(int(entity["quantity_horizontal"])):
-                                #
-                                # (0,0) .---------->        x_width = image.get_width()    #     ^ quantity_vertical
-                                #       |          x        y_height = image.get_height()  #     |---,---,---,
-                                #       |                                                  #     |---|---|---|
-                                #       |y                                                 #     |---'---'---'----->
-                                #                                                                    quantity_horizontal
-                                image = pygame.image.load(f"{image_name}.png")
-                                block_width = image.get_width()
-                                block_height = image.get_height()
-                                x = column * block_width + entity["x"]
-                                y = row * block_height + entity["y"]
-                                new_entity = self.get_entity_from_file(json_data=entity, image_suffix=image_suffix,
-                                                                       coords=(x, y))
-                                self.add_entity(new_entity)
+                                # Due to the fact that in pygame the coordinate axes are located as badly as possible,
+                                # and I decided to use a normal coordinate system,
+                                # the y axis should be converted when reading from a file
+                                # (0,0) .---------->        x_width = image.get_width()    # ^ quantity_vertical
+                                #       |          x        y_height = image.get_height()  # |---,---,---,
+                                #       |                                                  # |---|---|---|
+                                #       |y                                                 # |---'---'---'----->
+                                #                                                             quantity_horizontal
+                                # __________________________________________________________________________________
+                                #         _pygame_                                           _my_coordinate_axes_
+                                try:
+                                    image = pygame.image.load(f"{image_name}.png")
+                                    block_width = image.get_width()
+                                    block_height = image.get_height()
+                                    x = column * block_width + entity["x"]
+                                    y = row * block_height + entity["y"]
+                                    new_entity = self.get_entity_from_file(json_data=entity, image_suffix=image_suffix,
+                                                                           coords=(x, y))
+                                    self.add_entity(new_entity)
+                                except Exception as ex:
+                                    print(ex)
 
     def get_entity_image_by_type_and_suffix(self, type_name, image_suffix):
         image_pre_designation = type_name + image_suffix
@@ -181,6 +237,8 @@ class Level:
             image_name = f"img/Scenery/{image_pre_designation}"
         if type_name in self.items_type_names:
             image_name = f"img/Item/{image_pre_designation}"
+        if type_name in self.particles_type_names:
+            image_name = f"img/Particle/{image_pre_designation}"
         return image_name
 
     def get_entity_from_file(self, json_data, image_suffix, coords=None):
@@ -202,6 +260,8 @@ class Level:
             new_entity = Scenery(self, image_name, type_name)
         elif type_name in self.items_type_names:
             new_entity = Item(self, image_name, type_name)
+        elif type_name in self.particles_type_names:
+            new_entity = Particle(self, image_name, type_name)
 
         # for convenience, the entity file is stored with a coordinate system,
         # where the axes start in the lower left corner
@@ -213,10 +273,13 @@ class Level:
 
         if "quantity_of_content" in json_data:
             new_entity.quantity_of_content = int(json_data["quantity_of_content"])
-        for i in range(0, new_entity.quantity_of_content):
-            if "content" in json_data:
+        if "content" in json_data:
+            for i in range(0, new_entity.quantity_of_content):
                 new_entity.content.append(self.get_entity_from_file(json_data["content"], image_suffix))
                 self.add_entity(new_entity.content[-1])
+
+        if "move_when_player_x" in json_data:
+            new_entity.move_when_player_x = int(json_data["move_when_player_x"])
 
         return new_entity
 
@@ -229,13 +292,31 @@ class Level:
             self.sceneries.append(entity)
         if entity.type_name in self.items_type_names:
             self.items.append(entity)
+        if entity.type_name in self.particles_type_names:
+            self.particles.append(entity)
 
     def destroy_entity(self, entity):
-        pass
+        try:
+            entity.destroy()
+        except Exception as ex:
+            print(ex)
+        try:
+            if entity.type_name in self.solids_type_names:
+                self.solids.remove(entity)
+            if entity.type_name in self.characters_type_names:
+                self.characters.remove(entity)
+            if entity.type_name in self.sceneries_type_names:
+                self.sceneries.remove(entity)
+            if entity.type_name in self.items_type_names:
+                self.items.remove(entity)
+            if entity.type_name in self.particles_type_names:
+                self.particles.remove(entity)
+        except Exception as ex:
+            print(ex)
 
     def load_sets_of_images(self):
         try:
-            # Solids
+            # SOLIDS
             path_to_sprite = "img/Solid"
             # Block
             self.sets_of_images[f"{path_to_sprite}/Block/Content"] = \
@@ -249,7 +330,8 @@ class Level:
             self.sets_of_images[f"{path_to_sprite}/Brick/NoContent"] = \
                 [pygame.image.load(f"{path_to_sprite}/Brick/2.png")]
 
-            # Mario
+            # MARIO
+            # simple
             path_to_sprite = "img/Mario"
             self.sets_of_images[f"{path_to_sprite}/Small/Up"] = [pygame.image.load(f"{path_to_sprite}/Small/5.png")]
             self.sets_of_images[f"{path_to_sprite}/Small/Move"] = \
@@ -262,8 +344,30 @@ class Level:
                 [pygame.image.load(f"{path_to_sprite}/Large/{i}.png") for i in range(1, 5)]
             self.sets_of_images[f"{path_to_sprite}/Large/Stay"] = [pygame.image.load(f"{path_to_sprite}/Large/1.png")]
             self.sets_of_images[f"{path_to_sprite}/Large/Death"] = [pygame.image.load(f"{path_to_sprite}/Small/0.png")]
+            # immortal
+            # 6.png is empty
+            self.sets_of_images[f"{path_to_sprite}/Small/Immortal/Up"] = \
+                [pygame.image.load(f"{path_to_sprite}/Small/{i}.png") for i in range(5, 7)]
+            self.sets_of_images[f"{path_to_sprite}/Small/Immortal/Move"] = \
+                [pygame.image.load(f"{path_to_sprite}/Small/{math.ceil(i / 2)}.png") for i in range(1, 9)]
+            for i in range(1, 9, 2):
+                self.sets_of_images[f"{path_to_sprite}/Small/Immortal/Move"][i] = \
+                    pygame.image.load(f"{path_to_sprite}/Small/6.png")
+            self.sets_of_images[f"{path_to_sprite}/Small/Immortal/Stay"] = \
+                [pygame.image.load(f"{path_to_sprite}/Small/{i}.png") for i in range(1, 7, 5)]
 
-            # Items
+            self.sets_of_images[f"{path_to_sprite}/Large/Immortal/Up"] = \
+                [pygame.image.load(f"{path_to_sprite}/Large/{i}.png") for i in range(5, 7)]
+            self.sets_of_images[f"{path_to_sprite}/Large/Immortal/Move"] = \
+                [pygame.image.load(f"{path_to_sprite}/Large/{math.ceil(i / 2)}.png") for i in range(1, 9)]
+            for i in range(1, 9, 2):
+                self.sets_of_images[f"{path_to_sprite}/Large/Immortal/Move"][i] = \
+                    pygame.image.load(f"{path_to_sprite}/Large/6.png")
+            self.sets_of_images[f"{path_to_sprite}/Large/Immortal/Stay"] = \
+                [pygame.image.load(f"{path_to_sprite}/Large/{i}.png") for i in range(1, 7, 5)]
+            # star
+
+            # ITEMS
             path_to_sprite = "img/Item"
             self.sets_of_images[f"{path_to_sprite}/Coin/Static"] = \
                 [pygame.image.load(f"{path_to_sprite}/Coin/{i}.png") for i in range(1, 5)]
@@ -276,5 +380,68 @@ class Level:
                 [pygame.image.load(f"{path_to_sprite}/Mushroom/2.png")]
             self.sets_of_images[f"{path_to_sprite}/FlowerFire"] = \
                 [pygame.image.load(f"{path_to_sprite}/Flower/{i}.png") for i in range(1, 5)]
+
+            # PARTICLES
+            path_to_sprite = "img/Particle"
+            self.sets_of_images[f"{path_to_sprite}/BrickPart"] = \
+                [pygame.image.load(f"{path_to_sprite}/BrickPart/{i}.png") for i in range(1, 5)]
+
+            # CHARACTERS
+            path_to_sprite = "img/Character"
+            self.sets_of_images[f"{path_to_sprite}/Goomba/Move"] = \
+                [pygame.image.load(f"{path_to_sprite}/Goomba/{i}.png") for i in range(1, 3)]
+            self.sets_of_images[f"{path_to_sprite}/Goomba/Death"] = \
+                [pygame.image.load(f"{path_to_sprite}/Goomba/{i}.png") for i in range(3, 5)]
+
+            """for set_ in self.sets_of_images:
+                print(set_, self.sets_of_images[set_])"""
+
         except Exception as ex:
             print(ex)
+
+    def show_score(self, coords, score):
+        score_obj = Score(score, self)
+        score_obj.position_x = coords[0]
+        score_obj.position_y = coords[1]
+        self.particles.append(score_obj)
+        pass
+
+    # player death variants ending
+    #
+    def restart(self):
+
+        self.pause = False
+        self.coordinate_level_left_border = 0
+        # [feature] you can abuse the death and the final time if comment out next line
+        self.time_pause_range = 0
+
+        # All in-game entities
+        self.sceneries.clear()
+        self.solids.clear()
+        self.items.clear()
+        self.characters.clear()
+        self.particles.clear()
+
+        # self.player = Player(self)
+        self.load_level_from_file(self.file_name)
+
+    def loose(self):
+        self.pause = True
+        self.draw_background((0, 0, 0))
+
+        font = pygame.font.Font("font/ARCADECLASSIC.TTF", 64)
+        text_loose = font.render("LOOSE", True, (255, 255, 255))
+        self.window.blit(text_loose, (self.window.get_width() / 2 - text_loose.get_width() / 2,
+                                      self.window.get_height() / 2 - text_loose.get_height() / 2))
+
+    def win(self):
+        pass
+
+    def game_pause(self):
+        if not self.pause:
+            self.pause = True
+            self.time_pause_start = time.time()
+        else:
+            self.pause = False
+            self.time_pause_stop = time.time()
+            self.time_pause_range += self.time_pause_stop - self.time_pause_start

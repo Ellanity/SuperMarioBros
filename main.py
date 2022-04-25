@@ -12,30 +12,38 @@ clock = pygame.time.Clock()
 def main():
     lvl = Level(screen)
     lvl.load_level_from_file("lvl/1.json")
-    time_begin = lvl.time
-
     while True:
+        paused = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_UP:
                     lvl.player.movement_fall_after_jump()
-        # keys
-        if pygame.key.get_pressed()[K_RIGHT]:
-            lvl.player.movement_right(cant_go_beyond_screen=True)
-            lvl.move_screen()
-        if pygame.key.get_pressed()[K_LEFT]:
-            lvl.player.movement_left(cant_go_beyond_screen=True)
-        if pygame.key.get_pressed()[K_UP]:
-            lvl.player.movement_up()
+                if event.key == pygame.K_p:
+                    if not paused:
+                        lvl.game_pause()
+                        paused = True
 
+        if lvl.pause is False and lvl.player.lives > 0 and not lvl.player.state["Death"]:
+            # keys
+            # user movement
+            if pygame.key.get_pressed()[K_RIGHT]:
+                lvl.player.movement_right(cant_go_beyond_screen=True)
+                lvl.move_screen()
+            if pygame.key.get_pressed()[K_LEFT]:
+                lvl.player.movement_left(cant_go_beyond_screen=True)
+            if pygame.key.get_pressed()[K_UP]:
+                lvl.player.movement_up()
+
+        # updating screen
         lvl.updating_independent_world_parameters()
         lvl.frame_rendering()
 
         pygame.display.flip()
-        clock.tick(30)
+        clock.tick(40)
 
 
 if __name__ == "__main__":

@@ -1,11 +1,80 @@
 {
     "name": "1",
-    "time": "Infinity",
+    "time": 400,
     "length": 10128,
     "locations": [{"entry": "Plain"}],
+    "player": {
+        "start_x": 0,
+        "start_y": 128
+    },
     "areas": [{
         "setting": "Overworld",
         "creation": [
+            {
+                "type": "Goomba",
+                "x": 1000,
+                "y": 96
+            },{
+                "type": "Goomba",
+                "x": 2064,
+                "y": 96
+            },{
+                "type": "Goomba",
+                "x": 2352,
+                "y": 96
+            },{
+                "type": "Goomba",
+                "x": 2688,
+                "y": 96
+            },
+
+            {
+                "type": "Goomba",
+                "x": 3744,
+                "y": 96,
+                "move_when_player_x": 3144
+            },{
+                "type": "Goomba",
+                "x": 3840,
+                "y": 96,
+                "move_when_player_x": 3240
+            },{
+                "type": "Goomba",
+                "x": 4608,
+                "y": 96,
+                "move_when_player_x": 4008
+            },{
+                "type": "Goomba",
+                "x": 4704,
+                "y": 96,
+                "move_when_player_x": 4104
+            },{
+                "type": "Goomba",
+                "x": 5664,
+                "y": 96,
+                "move_when_player_x": 5064
+            },{
+                "type": "Goomba",
+                "x": 6192,
+                "y": 96,
+                "move_when_player_x": 5592
+            },{
+                "type": "Goomba",
+                "x": 6288,
+                "y": 96,
+                "move_when_player_x": 5688
+            },
+
+            {
+                "type": "Goomba",
+                "x": 8400,
+                "y": 96
+            },{
+                "type": "Goomba",
+                "x": 8496,
+                "y": 96
+            },
+
             {
                 "type": "Block",
                 "x": 768,
@@ -60,18 +129,22 @@
                 "quantity_of_content": 1
             },{
                 "type": "Brick",
-                "x": 3696,
+                "x": 3648,
                 "y": 240
             },{
                 "type": "Block",
-                "x": 3744,
+                "x": 3696,
                 "y": 240,
                 "content": {
                     "type": "Coin",
-                    "x": 3756,
+                    "x": 3702,
                     "y": 240
                 },
                 "quantity_of_content": 1
+            },{
+                "type": "Brick",
+                "x": 3744,
+                "y": 240
             },{
                 "type": "Brick",
                 "x": 3792,
@@ -113,7 +186,7 @@
                 "x": 4800,
                 "y": 240
             },{
-                "type": "Block",
+                "type": "Brick",
                 "x": 4848,
                 "y": 240,
                 "content": {
@@ -227,7 +300,6 @@
                 "x": 8208,
                 "y": 240
             },
-
             {
                 "macro": "Floor",
                 "x": 0,
