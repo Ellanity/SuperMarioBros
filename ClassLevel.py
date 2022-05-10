@@ -42,6 +42,10 @@ class Level:
         self.coordinate_level_left_border = 0  # used to move the screen + a reference point for rendering
         self.coordinate_level_max_right_point = self.window.get_width()
         self.length = 0
+        self.player_win_x = 0
+        self.player_x_to_disappear = 0
+        self.win_sound = False
+        self.loose_sound = False
 
         # All in-game entities
         self.sceneries = list()
@@ -49,20 +53,28 @@ class Level:
         self.items = list()
         self.characters = list()
         self.particles = list()
-        self.player = Player(self)
 
         # Different entities have different names.
         # Lists are required to separate entities into groups by name
         self.sceneries_type_names = ["BrickPlain", "Bush1", "Bush2", "Bush3",
-                                     "Cloud1", "Cloud2", "Cloud3", "HillSmall", "HillLarge"]
-        self.solids_type_names = ["Floor", "Stone", "Brick", "PipeHorizontal",
-                                  "PipeVertical", "PipeCapHorizontal", "PipeCapVertical", "PipeCrossroad", "Block"]
+                                     "Cloud1", "Cloud2", "Cloud3", "HillSmall",
+                                     "HillLarge", "Castle", "Flag", "Flagpole"]
+        self.solids_type_names = ["Floor", "Stone", "Brick", "Block", "PipeHorizontal",
+                                  "PipeVertical", "PipeCapHorizontal", "PipeCapVertical", "PipeCrossroad"]
         self.items_type_names = ["Coin", "MushroomBig", "MushroomLive", "FlowerFire"]
         self.characters_type_names = ["Goomba"]
         self.particles_type_names = ["BrickPart", "Score"]
         #
         self.sets_of_images = {}
         self.load_sets_of_images()
+        self.sets_of_sounds = {}
+        self.load_sets_of_sounds()
+        # ################
+        self.player = Player(self, "", "Mario")
+        self.additional_input_data()
+
+    def additional_input_data(self):
+        pass
 
     def draw_background(self, color):
         self.window.fill(color)
@@ -117,14 +129,24 @@ class Level:
         self.draw_group_of_entities(self.particles)
         self.draw_player()
 
+        must_display_stats = True
         if not self.pause:
             time_now = time.time()
+            if self.player.time_win != 0:
+                time_now = self.player.time_win
             self.time_left = self.time_range - (time_now - self.time_start) + self.time_pause_range
-            if self.time_left < 0:
-                self.time_left = 0
 
-        self.display_stats(self.player.score, int(self.time_left), self.data["name"],
-                           self.player.coins, self.player.lives)
+            if self.time_left <= 0:
+                self.time_left = 0
+                self.win_window()
+                must_display_stats = False
+            elif self.time_left >= 0 and self.player.time_win != 0 and self.player.state["Invisible"]:
+                self.player.time_win += 1
+                self.player.score += 50
+
+        if must_display_stats:
+            self.display_stats(self.player.score, int(self.time_left), self.data["name"],
+                               self.player.coins, self.player.lives)
 
         if self.time_left <= 0:
             if self.have_time:
@@ -175,6 +197,7 @@ class Level:
             print(ex)
 
         # player start pos
+        print(self.player.sets_of_images)
         self.player.position_x = self.data["player"]["start_x"]
         self.player.position_y = int(self.window.get_height() -
                                      self.data["player"]["start_y"] - self.player.image.get_height())
@@ -182,6 +205,8 @@ class Level:
         # Convert data to level objects
         if self.data is not None:
             self.length = self.data["length"]
+            self.player_win_x = self.data["player_win_x"]
+            self.player_x_to_disappear = self.data["player_x_to_disappear"]
             if self.data["time"] != "Infinity":
                 self.time_start = time.time()
                 self.time_range = int(self.data["time"])
@@ -333,6 +358,8 @@ class Level:
             # MARIO
             # simple
             path_to_sprite = "img/Mario"
+            self.sets_of_images[f"{path_to_sprite}/Invisible"] = [pygame.image.load(f"{path_to_sprite}/Small/6.png")]
+
             self.sets_of_images[f"{path_to_sprite}/Small/Up"] = [pygame.image.load(f"{path_to_sprite}/Small/5.png")]
             self.sets_of_images[f"{path_to_sprite}/Small/Move"] = \
                 [pygame.image.load(f"{path_to_sprite}/Small/{i}.png") for i in range(1, 5)]
@@ -342,6 +369,8 @@ class Level:
             self.sets_of_images[f"{path_to_sprite}/Large/Up"] = [pygame.image.load(f"{path_to_sprite}/Large/5.png")]
             self.sets_of_images[f"{path_to_sprite}/Large/Move"] = \
                 [pygame.image.load(f"{path_to_sprite}/Large/{i}.png") for i in range(1, 5)]
+            self.sets_of_images[f"{path_to_sprite}/Large/BigBoost"] = \
+                [pygame.image.load(f"{path_to_sprite}/BigBoost/{i}.png") for i in range(1, 4)]
             self.sets_of_images[f"{path_to_sprite}/Large/Stay"] = [pygame.image.load(f"{path_to_sprite}/Large/1.png")]
             self.sets_of_images[f"{path_to_sprite}/Large/Death"] = [pygame.image.load(f"{path_to_sprite}/Small/0.png")]
             # immortal
@@ -393,11 +422,26 @@ class Level:
             self.sets_of_images[f"{path_to_sprite}/Goomba/Death"] = \
                 [pygame.image.load(f"{path_to_sprite}/Goomba/{i}.png") for i in range(3, 5)]
 
-            """for set_ in self.sets_of_images:
-                print(set_, self.sets_of_images[set_])"""
-
         except Exception as ex:
             print(ex)
+
+    def load_sets_of_sounds(self):
+        try:
+            # ALL
+            self.sets_of_sounds["BreakBlock"] = pygame.mixer.Sound(f"sounds/smb_breakblock.wav") #
+            self.sets_of_sounds["Bump"] = pygame.mixer.Sound(f"sounds/smb_bump.wav") #
+            self.sets_of_sounds["Coin"] = pygame.mixer.Sound(f"sounds/smb_coin.wav") #
+            self.sets_of_sounds["Flagpole"] = pygame.mixer.Sound(f"sounds/smb_flagpole.wav") #
+            self.sets_of_sounds["GameOver"] = pygame.mixer.Sound(f"sounds/smb_gameover.wav") #
+            self.sets_of_sounds["JumpSmall"] = pygame.mixer.Sound(f"sounds/smb_jumpsmall.wav") #
+            self.sets_of_sounds["JumpLarge"] = pygame.mixer.Sound(f"sounds/smb_jumpbig.wav") #
+            self.sets_of_sounds["Kick"] = pygame.mixer.Sound(f"sounds/smb_kick.wav") #
+            self.sets_of_sounds["MarioDie"] = pygame.mixer.Sound(f"sounds/smb_mariodie.wav") #
+            self.sets_of_sounds["PowerUp"] = pygame.mixer.Sound(f"sounds/smb_powerup.wav") #
+            self.sets_of_sounds["StageClear"] = pygame.mixer.Sound(f"sounds/smb_stageclear.wav") ####
+            self.sets_of_sounds["WorldClear"] = pygame.mixer.Sound(f"sounds/smb_worldclear.wav") #
+        except Exception as ex:
+            print("Sound error > ", ex)
 
     def show_score(self, coords, score):
         score_obj = Score(score, self)
@@ -407,25 +451,28 @@ class Level:
         pass
 
     # player death variants ending
-    #
     def restart(self):
 
         self.pause = False
+        self.player.can_move = True
         self.coordinate_level_left_border = 0
         # [feature] you can abuse the death and the final time if comment out next line
         self.time_pause_range = 0
 
-        # All in-game entities
+        # In-game entities
         self.sceneries.clear()
         self.solids.clear()
         self.items.clear()
         self.characters.clear()
         self.particles.clear()
 
-        # self.player = Player(self)
         self.load_level_from_file(self.file_name)
 
     def loose(self):
+        if not self.loose_sound:
+            self.sets_of_sounds["GameOver"].play()
+            self.loose_sound = True
+
         self.pause = True
         self.draw_background((0, 0, 0))
 
@@ -434,8 +481,10 @@ class Level:
         self.window.blit(text_loose, (self.window.get_width() / 2 - text_loose.get_width() / 2,
                                       self.window.get_height() / 2 - text_loose.get_height() / 2))
 
-    def win(self):
-        pass
+        font = pygame.font.Font("font/ARCADECLASSIC.TTF", 32)
+        text_restart = font.render("press  R  to  restart", True, (255, 255, 255))
+        self.window.blit(text_restart, (self.window.get_width() / 2 - text_restart.get_width() / 2,
+                                      self.window.get_height() / 2 - text_restart.get_height() / 2 + text_loose.get_height()))
 
     def game_pause(self):
         if not self.pause:
@@ -445,3 +494,29 @@ class Level:
             self.pause = False
             self.time_pause_stop = time.time()
             self.time_pause_range += self.time_pause_stop - self.time_pause_start
+        self.player.can_move = not self.pause
+
+    def win_window(self):
+        if not self.win_sound:
+            self.sets_of_sounds["WorldClear"].play()
+            self.win_sound = True
+
+        self.draw_background((0, 0, 0))
+
+        font = pygame.font.Font("font/ARCADECLASSIC.TTF", 64)
+        text_loose = font.render("win", True, (255, 255, 255))
+        self.window.blit(text_loose, (self.window.get_width() / 2 - text_loose.get_width() / 2,
+                                      self.window.get_height() / 2 - text_loose.get_height() / 2))
+
+        font = pygame.font.Font("font/ARCADECLASSIC.TTF", 32)
+        text_restart = font.render(f"your  score  {self.player.score}", True, (255, 255, 255))
+        self.window.blit(text_restart, (self.window.get_width() / 2 - text_restart.get_width() / 2,
+                                        self.window.get_height() / 2 - text_restart.get_height() / 2 - \
+                                        text_loose.get_height()))
+
+        font = pygame.font.Font("font/ARCADECLASSIC.TTF", 32)
+        text_restart = font.render("press  R  to  restart", True, (255, 255, 255))
+        self.window.blit(text_restart, (self.window.get_width() / 2 - text_restart.get_width() / 2,
+                                        self.window.get_height() / 2 - text_restart.get_height() / 2 + \
+                                        text_loose.get_height()))
+

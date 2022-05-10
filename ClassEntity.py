@@ -5,6 +5,7 @@ import pygame
 # common characteristics inherent in all types of objects
 class Entity(pygame.sprite.Sprite):
     type_name = ""
+    image_name = ""
 
     def __init__(self, level=None, image_name=None, type_name=None):
         super().__init__()
@@ -26,13 +27,8 @@ class Entity(pygame.sprite.Sprite):
         self.path_to_sprite = ""
         # MOVEMENT
         self.speed = 0
-        self.state = {"Large": False,
-                      "Fire": False,
-                      "Star": False,
-                      "Move": False,
-                      "Up": False,
-                      "Death": False,
-                      "Immortal": False}
+        self.state = {"Large": False, "Fire": False, "Star": False, "Move": False,
+                      "Up": False, "Death": False, "Immortal": False, "BigBoost": False, "Invisible": False}
         self.move_left = False
         self.move_right = False
         self.have_physics = False
@@ -46,6 +42,7 @@ class Entity(pygame.sprite.Sprite):
 
         # SPRITE
         self.image = None
+        self.image_name = image_name
         if image_name is not None and type_name is not None:
             self.type_name = type_name
             try:
@@ -53,7 +50,7 @@ class Entity(pygame.sprite.Sprite):
             except Exception as ex1:
                 print("No img, check set >", ex1)
                 try:
-                    self.load_sets_of_images()
+                    # self.load_sets_of_images()
                     self.update_sprite()
                     self.animate(animation_speed=0)
                 except Exception as ex2:

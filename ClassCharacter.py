@@ -24,6 +24,7 @@ class Character(Entity):
         self.state = {"Move": True, "Up": False, "Death": False}
         # OTHER
         self.additional_input_data()
+        self.can_move = False
 
     def additional_input_data(self):
         if self.type_name == "Goomba":
@@ -98,8 +99,11 @@ class Character(Entity):
         if self.have_physics:
             self.physics()
 
+        if self.level.player.position_x > self.move_when_player_x:
+            self.can_move = True
+
         # move right/left
-        if (self.state["Move"] is True) and (self.level.player.position_x > self.move_when_player_x):
+        if (self.state["Move"] is True) and self.can_move:
             if self.turned_right is True:
                 self.movement_right()
                 if self.state["Move"] is False:

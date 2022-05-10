@@ -10,42 +10,45 @@ class Player(Character):
     def __init__(self, level, image_name=None, type_name=None):
         super().__init__(level=level, image_name=image_name, type_name=type_name)
         # GAME
-        self.type_name = "Player"
+        self.type_name = "Mario"
         self.score = 0
         self.coins = 0
         self.lives = 3
+        self.character_management = True
         # MOVEMENT
         self.speed = 7
+        self.can_move = True
+        self.have_physics = True
         # JUMP
         self.jump_speed = 20
         self.max_jump_height = 195
         self.jumped_up = True
         self.jump_after_kill = False
         self.jump_after_death = False
+        self.jump_sound = False
         # POSITION
         self.rect_width = 48
         self.rect_height = 48
         # SPRITE
-        self.set_image("img/MarioSmall/1")
-        self.state = {"Large": False,
-                      "Fire": False,
-                      "Star": False,
-                      "Move": False,
-                      "Up": False,
-                      "Death": False,
-                      "Immortal": False}
-        self.load_sets_of_images()
+        self.state = {"Large": False, "Fire": False, "Star": False, "Move": False,
+                      "Up": False, "Death": False, "Immortal": False, "BigBoost": False, "Invisible": False}
+        # self.load_sets_of_images()
         # TIME
         self.was_killed = False
-        # death time
-        # self.time_of_death = 0
-        # self.time_range_to_disappear = 1
+        # boost getting
+        self.time_of_getting_boost = 0
+        self.time_can_not_move_after_boost = 1
         # time of immortality [if had bonus and was killed]
         self.time_immortality_start = 0
+        self.time_can_not_move_after_death = 1
         self.time_range_of_immortality = 3
         # star time
         self.time_star_start = 0
         self.time_range_of_star = 10
+        # WIN
+        self.win = False
+        self.time_win = 0
+        self.flagpole_sound = False
 
     def update_sprite(self):
 
@@ -67,6 +70,12 @@ class Player(Character):
         if self.state["Death"] is True:
             self.set_of_images = self.level.sets_of_images[f"{self.path_to_sprite}/Death"]
             self.path_to_sprite += "/Death"
+        elif self.state["Invisible"] is True:
+            self.set_of_images = self.level.sets_of_images[f"img/Mario/Invisible"]
+            self.path_to_sprite = "img/Mario/Invisible"
+        elif self.state["BigBoost"] is True:
+            self.set_of_images = self.level.sets_of_images[f"{self.path_to_sprite}/BigBoost"]
+            self.path_to_sprite += "/BigBoost"
         elif self.state["Up"] is True:
             self.set_of_images = self.level.sets_of_images[f"{self.path_to_sprite}/Up"]
             self.path_to_sprite += "/Up"
@@ -89,10 +98,21 @@ class Player(Character):
         except Exception as ex:
             print(ex)
 
-        self.recalculate_the_mask()
-        self.recalculate_the_rect()
+        if self.image is not None:
+            self.recalculate_the_mask()
+            self.recalculate_the_rect()
 
     def movement_up(self):
+        if not self.can_move:
+            return
+
+        if not self.jump_sound:
+            if self.state["Large"]:
+                self.level.sets_of_sounds["JumpLarge"].play()
+            else:
+                self.level.sets_of_sounds["JumpSmall"].play()
+            self.jump_sound = True
+
         # define entity for action
         top_intersections = list()
         intersections = self.get_intersections(self.level.solids)
@@ -121,13 +141,13 @@ class Player(Character):
                 position_x_before = self.position_x
                 # Sliding on the block when jumping
                 # right
-                if self.position_x + self.image.get_width() < intersection["sprite"].position_x + 10:
+                if self.position_x + self.image.get_width() < intersection["sprite"].position_x + 20:
                     self.position_x -= (self.position_x + self.image.get_width() -
                                         intersection["sprite"].position_x)
                     roof = False
                     action_performed = True
                 # left
-                if self.position_x > intersection["sprite"].position_x + intersection["sprite"].image.get_width() - 10:
+                if self.position_x > intersection["sprite"].position_x + intersection["sprite"].image.get_width() - 20:
                     self.position_x += (intersection["sprite"].position_x + intersection[
                         "sprite"].image.get_width() - self.position_x)
                     roof = False
@@ -196,10 +216,14 @@ class Player(Character):
             if intersection["type_y"] == "bottom":
                 self.position_y = intersection["sprite"].position_y - self.image.get_height()
                 self.jumped_up = False
+                self.jump_sound = False
                 break
         self.update_sprite()
 
     def movement_right(self, cant_go_beyond_screen=False):
+        if not self.can_move:
+            return
+
         # sprite
         self.state["Move"] = True
         if not self.turned_right:
@@ -239,6 +263,9 @@ class Player(Character):
         self.update_sprite()
 
     def movement_left(self, cant_go_beyond_screen=False):
+        if not self.can_move:
+            return
+
         # sprite change
         self.state["Move"] = True
         if self.turned_right:
@@ -279,8 +306,10 @@ class Player(Character):
                 self.get_item_from_block(entity)
             if not self.state["Large"] and not entity.moved_up and len(entity.content) <= 0:
                 entity.moved_up = True
+                self.level.sets_of_sounds["Bump"].play()
             elif self.state["Large"] and len(entity.content) <= 0:
                 self.level.destroy_entity(entity)
+                self.level.sets_of_sounds["BreakBlock"].play()
 
         if entity.type_name == "Block":
             if entity.quantity_of_content > 0:
@@ -294,8 +323,10 @@ class Player(Character):
                                           entity.position_y), score=1000)
             self.update_sprite()
             self.level.destroy_entity(entity)
-            self.state["Immortal"] = True
-            self.time_immortality_start = time.time()
+            self.state["BigBoost"] = True
+            self.time_of_getting_boost = time.time()
+            self.can_move = False
+            self.level.sets_of_sounds["PowerUp"].play()
 
         # Characters
         if (not entity.state["Death"]) and (not self.state["Death"]) and (not self.state["Immortal"]):
@@ -310,8 +341,10 @@ class Player(Character):
                     self.jumped_up = False
                     self.start_jump_height = self.position_y
                     self.data_to_jump = {"max_jump_height": 48, "jump_speed": self.jump_speed}
+                    self.level.sets_of_sounds["Kick"].play()
                 elif intersection_x == "left" or intersection_x == "right":
                     self.death()
+                    self.state["Death"] = True
                     self.was_killed = True
 
     def get_item_from_block(self, entity):
@@ -323,9 +356,11 @@ class Player(Character):
                 entity.content[entity.quantity_of_content].jump_from_block(entity)
                 self.coins += 1
                 self.score += 200
+                self.level.sets_of_sounds["Coin"].play()
             # MushroomBig
             if entity.content[entity.quantity_of_content].type_name == "MushroomBig":
                 entity.content[entity.quantity_of_content].jump_from_block(entity)
+                self.level.sets_of_sounds["PowerUp"].play()
 
     def check_intersection_with_items(self):
         # the items are arranged so that their lower part coincides
@@ -351,45 +386,146 @@ class Player(Character):
             self.movement_up()
 
         # physics
-        if self.state["Death"]:
-            self.physics(ignore_solid=True)
-        else:
-            self.physics()
+        if self.have_physics:
+            if self.state["Death"]:
+                self.physics(ignore_solid=True)
+            else:
+                self.physics()
 
         # intersections with items
         for intersection in self.check_intersection_with_items():
             self.interaction_with_entity(entity=intersection["sprite"],
                                          intersection_x=intersection["type_x"],
                                          intersection_y=intersection["type_y"])
+        # check win case
+        self.check_win()
+
         # death
         self.check_death()
 
         # bonuses will end after the death check
-        self.check_bonus_time()
+        self.check_time()
 
-    def check_bonus_time(self):
+    def check_win(self):
+        # if self.position_x > self.level.player_win_x - self.speed
+        if self.position_x > self.level.player_win_x:
+            if not self.win:
+                self.win = True
+
+                self.position_x = self.level.player_win_x + self.image.get_width() - 1
+                # score for height
+                if self.position_y < self.level.window.get_height() / 2:
+                    got_score = 2000
+                elif self.position_y < self.level.window.get_height() - (self.max_jump_height + 96):
+                    got_score = 1000
+                else:
+                    got_score = 400
+
+                self.score += got_score
+                self.level.show_score(coords=(self.position_x + self.image.get_width(),
+                                              self.position_y), score=got_score)
+
+        self.win_movement()
+
+    def win_movement(self):
+        if not self.win:
+            return
+
+        if self.time_win == 0:
+            self.time_win = time.time()
+        # show
+        # self.level.player_win_x 9476
+        # castle 9696
+        if self.position_x < self.level.player_win_x + self.image.get_width():
+            self.turned_right = False
+            self.have_physics = False
+            self.character_management = False
+            self.position_x = self.level.player_win_x + self.image.get_width()
+            self.update_sprite()
+
+            # flag
+            for scenery in self.level.sceneries:
+                if scenery.type_name == "Flag":
+                    scenery.have_physics = True
+                    scenery.jump_speed = 10
+                    print(scenery)
+
+        # add score
+        if self.position_x == self.level.player_win_x + self.image.get_width():
+            if not self.flagpole_sound:
+                self.level.sets_of_sounds["Flagpole"].play()
+                self.flagpole_sound = True
+
+            self.have_physics = True
+            self.jump_speed = 10
+            self.jumped_up = True
+
+            self.movement_up()
+            self.update_sprite()
+            if not self.state["Up"]:
+                self.position_x += 1
+
+        if self.position_x > self.level.player_win_x + self.image.get_width():
+            self.jump_speed = 20
+            self.can_move = True
+            self.turned_right = True
+            if self.position_x < self.level.player_x_to_disappear:
+                self.movement_right()
+            else:
+                self.can_move = False
+                self.state["Invisible"] = True
+            self.update_sprite()
+
+    def check_time(self):
         now_time = time.time()
         # immortal
         if self.state["Immortal"] and (not self.time_immortality_start == 0):
             self.state["Death"] = False
-            self.animation_speed = 0.4
-            left_time_of_bonus = self.time_range_of_immortality - \
-                                 (now_time - self.time_immortality_start) + self.level.time_pause_range
-            if left_time_of_bonus < 0:
-                self.state["Immortal"] = False
-        else:
-            self.animation_speed = 0.2  # return anim speed
+            self.can_move = True
+            self.animation_speed = 0.5
+            self.have_physics = False
+            # when freezing ends
+            left_time_of_bonus = self.time_can_not_move_after_death - \
+                                 (now_time - self.time_immortality_start - self.level.time_pause_range)
+            if left_time_of_bonus > 0:
+                self.can_move = False
+            else:
+                self.can_move = True
+                self.have_physics = True
+
+        # when immortality finish
+        left_time_of_bonus = self.time_range_of_immortality - \
+                             (now_time - self.time_immortality_start - self.level.time_pause_range)
+        if left_time_of_bonus < 0:
+            self.state["Immortal"] = False
+            self.animation_speed = 0.2
+
+        # boost
+        if self.state["BigBoost"] and (not self.time_of_getting_boost == 0):
+            self.state["Death"] = False
+            self.can_move = True
+            self.animation_speed = 0.2
+            self.have_physics = False
+            # when freezing ends
+            left_time_of_bonus = self.time_can_not_move_after_boost - \
+                                 (now_time - self.time_of_getting_boost - self.level.time_pause_range)
+            if left_time_of_bonus > 0:
+                self.can_move = False
+            else:
+                self.can_move = True
+                self.have_physics = True
+                self.state["BigBoost"] = False
 
         # star
         if self.state["Star"] and (not self.time_immortality_start == 0):
             self.state["Death"] = False
-            self.animation_speed = 0.4
+            self.can_move = True
+            # self.animation_speed = 0.5
             left_time_of_bonus = self.time_range_of_star - \
                                  (now_time - self.time_star_start) + self.level.time_pause_range
             if left_time_of_bonus < 0:
                 self.state["Star"] = False
-        else:
-            self.animation_speed = 0.2
+                # self.animation_speed = 0.2
 
     def check_death(self):
         # intersection with character
@@ -400,19 +536,24 @@ class Player(Character):
                                          intersection_y=intersection["type_y"])
         # out of window
         if self.position_y > self.level.window.get_height():
+            print("die")
             self.jumped_up = False
             self.was_killed = False
+            self.state["Death"] = True
             self.death()
 
         # when die, always do
-        if self.state["Death"]:
-            self.death()
+        self.death()
 
     def death(self):
+        if not self.state["Death"]:
+            return
+
         # cases when it can survive
         if self.state["Large"] or self.state["Fire"] and self.was_killed:
             self.state["Large"] = self.state["Fire"] = False
             self.state["Immortal"] = True
+            self.can_move = False
             self.time_immortality_start = time.time()
             self.was_killed = False
         # no chance to survive
@@ -427,20 +568,27 @@ class Player(Character):
                     self.start_jump_height = self.position_y
                 #
                 self.state["Death"] = True
+                self.can_move = False
                 self.update_sprite()
             # the player fell into the abyss
-            elif not self.jumped_up:
-                if self.lives > 0:
+            # elif not self.jumped_up:
+            else:
+                if self.lives > 1:
+                    self.level.sets_of_sounds["MarioDie"].play()
                     # reset params
                     self.state["Death"] = False
+                    self.can_move = True
                     self.lives -= 1
                     self.coins = 0
                     self.score = 0
                     self.jumped_up = False
+                    self.state = {"Large": False, "Fire": False, "Star": False, "Move": False,
+                                  "Up": False, "Death": False, "Immortal": False, "BigBoost": False, "Invisible": False}
                     # time
                     self.time_immortality_start = 0
                     self.time_star_start = 0
                     #
                     self.level.restart()
                 else:
+                    print("loose")
                     self.level.loose()

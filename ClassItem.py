@@ -81,7 +81,6 @@ class Item(Entity):
             self.turned_right = True
             self.have_physics = True
             self.start_jump_height = block.position_y - block.image.get_height()
-            # self.data_to_jump = {"max_jump_height": block.image.get_height(), "jump_speed": 2}
             self.data_to_jump = {"max_jump_height": 0, "jump_speed": 2}
         if self.type_name == "Coin":
             self.moved_up = True

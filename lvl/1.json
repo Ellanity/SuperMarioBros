@@ -1,7 +1,9 @@
 {
     "name": "1",
-    "time": 400,
+    "time": 300,
     "length": 10128,
+    "player_win_x": 9468,
+    "player_x_to_disappear": 9756,
     "locations": [{"entry": "Plain"}],
     "player": {
         "start_x": 0,
@@ -702,6 +704,18 @@
                 "type": "Cloud1",
                 "x": 9624,
                 "y": 504
+            },{
+                "type": "Flagpole",
+                "x": 9516,
+                "y": 144
+            },{
+                "type": "Flag",
+                "x": 9480,
+                "y": 528
+            },{
+                "type": "Castle",
+                "x": 9696,
+                "y": 96
             }
         ]
     }]
