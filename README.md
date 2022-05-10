@@ -1,9 +1,10 @@
 # SuperMarioBros
 1 lvl
 
-PyGame library is required for compilation.
+> PyGame library is required for compilation.
+> Made a lot of bugs, cut out a lot of features.
 
-Made a lot of bugs, cut out a lot of features.
-
+```
+Please specify the source if you will use the code  
 <contacts: eldarpoplauski111@gmail.com>
-
+```
